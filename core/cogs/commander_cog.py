@@ -34,8 +34,7 @@ from discord.ext import commands
 from discord     import app_commands
 
 from core.data                   import commander_repo, guild_repo
-from core.domain.exceptions      import DomainError
-from core.shared                 import embeds, config
+from core.shared                 import config
 from core.shared.faction_picker  import prompt_faction, get_faction_alignment
 
 log = logging.getLogger(__name__)

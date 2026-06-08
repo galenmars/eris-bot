@@ -786,6 +786,7 @@ def delete_campaign(
     db.execute('DELETE FROM campaign_channels       WHERE campaign_id = ?', (campaign_id,))
     db.execute('DELETE FROM campaign_board_messages WHERE campaign_id = ?', (campaign_id,))
     db.execute('DELETE FROM campaigns               WHERE campaign_id = ?', (campaign_id,))
+    db.commit()
 
 
 def register_board_message(

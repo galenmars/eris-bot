@@ -433,7 +433,7 @@ class EmsCog(commands.Cog, name="EMS"):
             return
 
         # Resolve all args the flow function needs
-        commander = commander_repo.get_commander(self.db, request['commander_id'])
+        commander = commander_repo.get_by_id(self.db, request['commander_id'])
         if not commander:
             await interaction.followup.send(f"❌ Commander for request {request_id} not found.")
             return
