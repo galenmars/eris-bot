@@ -1,0 +1,36 @@
+# Secrets
+.env
+authentication.py
+credentials.json
+dev_seed.py
+
+# Database files — don't commit live data
+*.db
+*.db-shm
+*.wal
+
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+pre-env-token_*.py
+
+# IDE
+.idea/
+.vscode/
+
+# Node (if fleet builder ever gets a build step)
+node_modules/
+config.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+backups/

@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E.R.I.S. — Architecture Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@200;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #080c10;
+    --surface:    #0d1520;
+    --surface2:   #111d2e;
+    --border:     #1a3050;
+    --accent:     #00c8ff;
+    --accent2:    #ff6b35;
+    --accent3:    #00ff9d;
+    --text:       #c8daea;
+    --text-dim:   #5a7a9a;
+    --text-bright:#e8f4ff;
+    --mono:       'Share Tech Mono', monospace;
+    --sans:       'Rajdhani', sans-serif;
+    --body:       'Exo 2', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCANLINE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,200,255,0.015) 2px,
+      rgba(0,200,255,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,200,255,0.05) 0%, transparent 100%);
+    overflow: hidden;
+  }
+
+  header::before {
+    content: 'ARCHITECTURE';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--mono);
+    font-size: 120px;
+    color: rgba(0,200,255,0.03);
+    letter-spacing: 20px;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .header-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+
+  h1 {
+    font-family: var(--sans);
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 2px;
+    line-height: 1;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.2s;
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-family: var(--body);
+    font-weight: 200;
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-top: 12px;
+    letter-spacing: 1px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.35s;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8,12,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  nav a {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 16px 20px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  nav a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    position: relative;
+    z-index: 10;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    margin-bottom: 80px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  section:nth-child(1) { animation-delay: 0.1s; }
+  section:nth-child(2) { animation-delay: 0.2s; }
+  section:nth-child(3) { animation-delay: 0.3s; }
+  section:nth-child(4) { animation-delay: 0.4s; }
+  section:nth-child(5) { animation-delay: 0.5s; }
+  section:nth-child(6) { animation-delay: 0.6s; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-family: var(--sans);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-bright);
+    letter-spacing: 1px;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  h2::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin: 28px 0 12px;
+  }
+
+  p { margin-bottom: 14px; color: var(--text); }
+
+  /* ── DEPENDENCY GRAPH ── */
+  .dep-graph {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 2.2;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dep-graph::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  .dep-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(26,48,80,0.5);
+    transition: background 0.2s;
+  }
+
+  .dep-row:last-child { border-bottom: none; }
+  .dep-row:hover { background: rgba(0,200,255,0.04); }
+
+  .dep-arrow {
+    color: var(--text-dim);
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+  }
+
+  .dep-name {
+    color: var(--accent);
+    min-width: 200px;
+    font-weight: bold;
+  }
+
+  .dep-desc {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .dep-entry { color: var(--accent3); }
+  .dep-bottom { color: var(--accent2); }
+
+  /* ── LAYER CARDS ── */
+  .layer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .layer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .layer-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .layer-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .layer-card.cogs::before     { background: #00c8ff; }
+  .layer-card.sequences::before { background: #a855f7; }
+  .layer-card.domain::before   { background: #00ff9d; }
+  .layer-card.math::before     { background: #ff6b35; }
+  .layer-card.data::before     { background: #ffd700; }
+  .layer-card.shared::before   { background: #ec4899; }
+
+  .layer-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .layer-title {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+  }
+
+  .layer-path {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 14px;
+    opacity: 0.7;
+  }
+
+  .layer-card p {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .rule-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    color: var(--accent2);
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-top: 4px;
+  }
+
+  /* ── GOLDEN RULE BOX ── */
+  .golden-rule {
+    background: var(--surface);
+    border: 1px solid rgba(0,200,255,0.3);
+    border-left: 4px solid var(--accent);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .golden-rule .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .golden-rule p {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin: 0;
+  }
+
+  /* ── LIFECYCLE ── */
+  .lifecycle {
+    counter-reset: step;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .lifecycle-step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 0 20px;
+    position: relative;
+  }
+
+  .lifecycle-step:not(:last-child) .step-line {
+    position: absolute;
+    left: 23px;
+    top: 48px;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--border), transparent);
+  }
+
+  .step-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .lifecycle-step:hover .step-num {
+    border-color: var(--accent);
+    background: rgba(0,200,255,0.1);
+  }
+
+  .step-content {
+    padding: 12px 0 32px;
+  }
+
+  .step-file {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .step-desc {
+    font-size: 14px;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ── FOLDER TABLE ── */
+  .folder-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .folder-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .folder-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(26,48,80,0.5);
+    vertical-align: top;
+  }
+
+  .folder-table tr:hover td {
+    background: rgba(0,200,255,0.03);
+  }
+
+  .folder-table .folder {
+    font-family: var(--mono);
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .folder-table .what {
+    color: var(--text);
+  }
+
+  .folder-table .why {
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .check-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: start;
+    transition: border-color 0.2s;
+  }
+
+  .check-item:hover { border-color: rgba(0,200,255,0.3); }
+
+  .check-box {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .check-box:hover {
+    border-color: var(--accent3);
+  }
+
+  .check-box.checked {
+    border-color: var(--accent3);
+    background: rgba(0,255,157,0.15);
+  }
+
+  .check-box.checked::after {
+    content: '✓';
+    font-size: 12px;
+    color: var(--accent3);
+  }
+
+  .check-question {
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+
+  .check-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .check-yes { color: var(--accent2); font-size: 13px; }
+  .check-no  { color: var(--accent3); font-size: 13px; }
+
+  /* ── DEV RULES ── */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    position: relative;
+  }
+
+  .rule-card::before {
+    content: attr(data-num);
+    position: absolute;
+    top: -1px;
+    right: 16px;
+    font-family: var(--mono);
+    font-size: 48px;
+    color: rgba(0,200,255,0.05);
+    line-height: 1;
+  }
+
+  .rule-card h4 {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .rule-card p {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* ── CODE BLOCK ── */
+  pre {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 20px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+    color: var(--text);
+    margin: 16px 0;
+  }
+
+  pre .comment { color: var(--text-dim); }
+  pre .path    { color: var(--accent); }
+  pre .arrow   { color: var(--accent2); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    header, main { padding-left: 20px; padding-right: 20px; }
+    nav { padding: 0 20px; }
+    .dep-graph { padding: 20px; }
+    .dep-desc { display: none; }
+    h1 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">// MASTER BLUEPRINT · v2.0</div>
+  <h1><span>E.R.I.S.</span> Architecture</h1>
+  <p class="header-sub">Engagement Resource &amp; Intelligence System — Developer Reference</p>
+</header>
+
+<nav>
+  <a href="#principles">Principles</a>
+  <a href="#graph">Dependency Graph</a>
+  <a href="#layers">Layers</a>
+  <a href="#lifecycle">Request Lifecycle</a>
+  <a href="#folders">Folder Manifest</a>
+  <a href="#rules">Dev Rules</a>
+  <a href="#checklist">Checklist</a>
+  <a href="#extending">Extending</a>
+</nav>
+
+<main>
+
+  <!-- PRINCIPLES -->
+  <section id="principles">
+    <div class="section-label">// 01</div>
+    <h2>Core Principles</h2>
+
+    <div class="golden-rule">
+      <div class="label">GOLDEN RULE</div>
+      <p>Code flows <span style="color:var(--accent)">down</span>. Data flows <span style="color:var(--accent2)">up</span>.</p>
+    </div>
+
+    <div class="rules-grid">
+      <div class="rule-card" data-num="I">
+        <h4>Unidirectional Dependency</h4>
+        <p>A file may only import from layers below it. Cogs → Sequences → Domain → Math. Domain must never import from a Cog.</p>
+      </div>
+      <div class="rule-card" data-num="II">
+        <h4>Pure Logic Principle</h4>
+        <p>If a function doesn't touch Discord or a database, it lives in Domain or Math. This enables unit testing without mocking Discord.</p>
+      </div>
+      <div class="rule-card" data-num="III">
+        <h4>Sequence-Driven Flows</h4>
+        <p>Any operation spanning more than one interaction lives in Sequences. Never block the main bot thread in a Cog.</p>
+      </div>
+      <div class="rule-card" data-num="IV">
+        <h4>The JSON is the Config</h4>
+        <p>Game balance lives in the theme JSON. To change a matchup bonus, edit the file — not the Python. The engine consumes config; it doesn't hardcode it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPENDENCY GRAPH -->
+  <section id="graph">
+    <div class="section-label">// 02</div>
+    <h2>Dependency Graph</h2>
+    <div class="dep-graph">
+      <div class="dep-row">
+        <div class="dep-arrow">▶</div>
+        <div class="dep-name dep-entry">bot.py</div>
+        <div class="dep-desc">ENTRY POINT — cog loader, theme loader, DB init</div>
+      </div>
+      <div class="dep-row">
+        <div class="dep-arrow">↓</div>
+        <div class="dep-name" style="color:#00c8ff">cogs/</div>
+        <div class="dep-desc">INTERFACE — slash commands, buttons, select menus</div>
+      </div>
+      <div class="dep-row">
+        <div class="dep-arrow">↓</div>
+        <div class="dep-name" style="color:#a855f7">sequences/</div>
+        <div class="dep-desc">ORCHESTRATION — wait_for loops, DM flows, timeouts</div>
+      </div>
+      <div class="dep-row">
+        <div class="dep-arrow">↓</div>
+        <div class="dep-name" style="color:#00ff9d">core/domain/</div>
+        <div class="dep-desc">RULES — pure validation, eligibility, game logic</div>
+      </div>
+      <div class="dep-row">
+        <div class="dep-arrow">↓</div>
+        <div class="dep-name" style="color:#ff6b35">core/math/</div>
+        <div class="dep-desc">PHYSICS — dice, matchup bonuses, EMS calculation</div>
+      </div>
+      <div class="dep-row">
+        <div class="dep-arrow">↓</div>
+        <div class="dep-name dep-bottom" style="color:#ffd700">core/data/</div>
+        <div class="dep-desc">PERSISTENCE — SQLite repositories, WAL mode</div>
+      </div>
+      <div class="dep-row">
+        <div class="dep-arrow">◆</div>
+        <div class="dep-name" style="color:#ec4899">core/shared/</div>
+        <div class="dep-desc">CROSS-CUTTING — faction picker, embed builders, constants</div>
+      </div>
+    </div>
+    <p style="margin-top:16px; font-size:13px; color:var(--text-dim);">
+      <code style="font-family:var(--mono); color:var(--accent2);">core/shared/</code> may be imported by Cogs, Sequences, and Domain — it is the one horizontal dependency. It must never import from any of them.
+    </p>
+  </section>
+
+  <!-- LAYERS -->
+  <section id="layers">
+    <div class="section-label">// 03</div>
+    <h2>Layer Responsibilities</h2>
+    <div class="layer-grid">
+
+      <div class="layer-card cogs">
+        <div class="layer-num">LAYER 01</div>
+        <div class="layer-title">Cogs</div>
+        <div class="layer-path">cogs/</div>
+        <p>The remote control. Handles Discord slash commands, buttons, and events. Validates permissions, parses arguments, calls the appropriate Sequence.</p>
+        <span class="rule-tag">⚠ Never write business logic here</span>
+      </div>
+
+      <div class="layer-card sequences">
+        <div class="layer-num">LAYER 02</div>
+        <div class="layer-title">Sequences</div>
+        <div class="layer-path">sequences/</div>
+        <p>The project manager. Handles <code style="font-family:var(--mono);font-size:12px;color:#a855f7">wait_for</code> loops, DM conversations, timeouts, and orchestrating multiple domain and repo calls in sequence.</p>
+        <span class="rule-tag">⚠ Only layer allowed to bridge user input + multi-step logic</span>
+      </div>
+
+      <div class="layer-card domain">
+        <div class="layer-num">LAYER 03</div>
+        <div class="layer-title">Domain</div>
+        <div class="layer-path">core/domain/</div>
+        <p>The rules of the game. Pure input/output functions — returns data or raises a <code style="font-family:var(--mono);font-size:12px;color:#00ff9d">DomainError</code>. No side effects, no Discord objects, no SQL.</p>
+        <span class="rule-tag">⚠ No discord.Member, no await, no DB calls</span>
+      </div>
+
+      <div class="layer-card math">
+        <div class="layer-num">LAYER 04</div>
+        <div class="layer-title">Math</div>
+        <div class="layer-path">core/math/</div>
+        <p>The physics engine. Deep computation: dice rolls, matchup bonuses, loss tables, EMS calculations. Consumes <code style="font-family:var(--mono);font-size:12px;color:#ff6b35">theme.json</code> as configuration.</p>
+        <span class="rule-tag">⚠ These functions don't know the bot exists</span>
+      </div>
+
+      <div class="layer-card data">
+        <div class="layer-num">LAYER 05</div>
+        <div class="layer-title">Data</div>
+        <div class="layer-path">core/data/</div>
+        <p>The database. SQL execution and data mapping via the Repository pattern. One file per domain (e.g. <code style="font-family:var(--mono);font-size:12px;color:#ffd700">battle_repo.py</code>). No business logic — only queries.</p>
+        <span class="rule-tag">⚠ Raw SQL lives here and nowhere else</span>
+      </div>
+
+      <div class="layer-card shared">
+        <div class="layer-num">CROSS-CUTTING</div>
+        <div class="layer-title">Shared</div>
+        <div class="layer-path">core/shared/</div>
+        <p>Code that would otherwise be duplicated across three Cogs. Includes the faction/organization picker, embed formatters, and shared constants.</p>
+        <span class="rule-tag">⚠ Never import from Cogs, Sequences, or Data</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- LIFECYCLE -->
+  <section id="lifecycle">
+    <div class="section-label">// 04</div>
+    <h2>Request Lifecycle: <code style="font-family:var(--mono); font-size:20px; color:var(--accent)">/battle engage</code></h2>
+    <div class="lifecycle">
+
+      <div class="lifecycle-step">
+        <div class="step-line"></div>
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-file">cogs/battle_cog.py</div>
+          <p class="step-desc">Verifies <code style="font-family:var(--mono);font-size:12px">interaction.user</code> permissions and that the user has an enrolled commander. Calls <code style="font-family:var(--mono);font-size:12px">battle_flow.engage()</code>.</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <div class="step-line"></div>
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-file">sequences/battle_flow.py</div>
+          <p class="step-desc">Traffic controller. Handles the DM tactic-selection prompt, <code style="font-family:var(--mono);font-size:12px">wait_for</code> loop, and timeout. Asks Domain if the chosen tactic is legal.</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <div class="step-line"></div>
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-file">core/domain/battle.py</div>
+          <p class="step-desc">"Is this tactic valid for this commander?" Returns <code style="font-family:var(--mono);font-size:12px">True</code> or raises <code style="font-family:var(--mono);font-size:12px">DomainError</code>. Knows nothing about Discord.</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <div class="step-line"></div>
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-file">core/math/dice.py</div>
+          <p class="step-desc">Calculates the round total: reads tactic bonuses from <code style="font-family:var(--mono);font-size:12px">theme.json</code>, rolls dice, returns the result. Pure computation.</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <div class="step-line"></div>
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-file">core/data/battle_repo.py</div>
+          <p class="step-desc">Saves the round result to SQLite. The Sequence drives <em>when</em> the commit happens — never a half-finished state.</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-file">core/shared/</div>
+          <p class="step-desc">Formats and posts the battle result embed to the channel. Display logic stays out of both the Sequence and the Cog.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOLDER MANIFEST -->
+  <section id="folders">
+    <div class="section-label">// 05</div>
+    <h2>Folder Manifest</h2>
+    <table class="folder-table">
+      <thead>
+        <tr>
+          <th>Folder</th>
+          <th>What lives here</th>
+          <th>Why</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="folder">cogs/</td>
+          <td class="what">Slash commands, buttons, select menus</td>
+          <td class="why">Only what the user sees and clicks</td>
+        </tr>
+        <tr>
+          <td class="folder">sequences/</td>
+          <td class="what">wait_for loops, DM flows, timeouts</td>
+          <td class="why">Any process spanning more than one interaction</td>
+        </tr>
+        <tr>
+          <td class="folder">core/domain/</td>
+          <td class="what">Validation rules, eligibility checks</td>
+          <td class="why">Game logic that works identically in tests, DMs, or slash commands</td>
+        </tr>
+        <tr>
+          <td class="folder">core/math/</td>
+          <td class="what">Formulas, dice, matchup table lookups</td>
+          <td class="why">Pure computation. Consumes theme.json as configuration</td>
+        </tr>
+        <tr>
+          <td class="folder">core/data/</td>
+          <td class="what">SQL queries only — one file per domain</td>
+          <td class="why">The rest of the bot never writes raw SQL</td>
+        </tr>
+        <tr>
+          <td class="folder">core/shared/</td>
+          <td class="what">Faction/org picker, embed builders, constants</td>
+          <td class="why">Code that would otherwise be copy-pasted across three Cogs</td>
+        </tr>
+        <tr>
+          <td class="folder">themes/</td>
+          <td class="what">JSON theme files (factions, matchups, ship stats)</td>
+          <td class="why">Swap the entire game balance without touching Python</td>
+        </tr>
+        <tr>
+          <td class="folder">docs/</td>
+          <td class="what">Fleet builder, army builder, architecture page</td>
+          <td class="why">Static GitHub Pages assets — no server required</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- DEV RULES -->
+  <section id="rules">
+    <div class="section-label">// 06</div>
+    <h2>Developer Rules</h2>
+    <p>When a new developer joins the project, give them these four rules:</p>
+    <div class="rules-grid">
+      <div class="rule-card" data-num="1">
+        <h4>No Discord Objects in Domain / Math</h4>
+        <p>Pass <code style="font-family:var(--mono);font-size:11px">int</code> IDs or plain <code style="font-family:var(--mono);font-size:11px">dict</code> records. Never <code style="font-family:var(--mono);font-size:11px">discord.Member</code> or <code style="font-family:var(--mono);font-size:11px">discord.Interaction</code>.</p>
+      </div>
+      <div class="rule-card" data-num="2">
+        <h4>Unidirectional Imports Only</h4>
+        <p>Cogs → Sequences → Domain → Math. If you're importing a Cog inside Domain, you've broken the architecture.</p>
+      </div>
+      <div class="rule-card" data-num="3">
+        <h4>Repo Commits, Sequences Drive</h4>
+        <p>The Data layer owns <code style="font-family:var(--mono);font-size:11px">db.commit()</code>. The Sequence layer decides <em>when</em> the commit happens — never save a half-finished state.</p>
+      </div>
+      <div class="rule-card" data-num="4">
+        <h4>The JSON is the Config</h4>
+        <p>Change game balance in <code style="font-family:var(--mono);font-size:11px">theme.json</code>, not in Python. The math engine reads config; it doesn't hardcode it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section id="checklist">
+    <div class="section-label">// 07</div>
+    <h2>Maintenance Checklist</h2>
+    <p style="margin-bottom:20px">Use this when reviewing any new file or PR. Click to mark complete.</p>
+    <div class="checklist">
+      <div class="check-item">
+        <div class="check-box" onclick="this.classList.toggle('checked')"></div>
+        <div>
+          <div class="check-question">Does the file contain Discord objects (Member, Interaction)?</div>
+          <div class="check-answers">
+            <div class="check-yes">→ Yes: file belongs in cogs/ or sequences/</div>
+            <div class="check-no">→ No: should be in domain/, math/, or data/</div>
+          </div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box" onclick="this.classList.toggle('checked')"></div>
+        <div>
+          <div class="check-question">Does the file use <code style="font-family:var(--mono);font-size:12px">await</code>?</div>
+          <div class="check-answers">
+            <div class="check-yes">→ Yes: likely part of Sequences or Cogs</div>
+            <div class="check-no">→ No: should be a pure function in Domain or Math</div>
+          </div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box" onclick="this.classList.toggle('checked')"></div>
+        <div>
+          <div class="check-question">Does the file write raw SQL?</div>
+          <div class="check-answers">
+            <div class="check-yes">→ Yes: must live in core/data/ — never in a Cog or Sequence</div>
+            <div class="check-no">→ No: call a repo function from core/data/ instead</div>
+          </div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box" onclick="this.classList.toggle('checked')"></div>
+        <div>
+          <div class="check-question">Does the logic span multiple interactions or DM steps?</div>
+          <div class="check-answers">
+            <div class="check-yes">→ Yes: it lives in sequences/ — not in the Cog</div>
+            <div class="check-no">→ No: single-interaction logic is fine in the Cog</div>
+          </div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box" onclick="this.classList.toggle('checked')"></div>
+        <div>
+          <div class="check-question">Is the same code duplicated in more than one Cog?</div>
+          <div class="check-answers">
+            <div class="check-yes">→ Yes: extract it to core/shared/</div>
+            <div class="check-no">→ No: leave it where it is</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXTENDING -->
+  <section id="extending">
+    <div class="section-label">// 08</div>
+    <h2>Adding a New System</h2>
+    <p>To add a <strong>Mercenary Contract System</strong> as an example — you create four new files and touch nothing existing:</p>
+    <pre><code><span class="comment"># Step 1 — Persistence</span>
+<span class="path">core/data/mercenary_repo.py</span>     <span class="comment">← SQL for the mercenary_contracts table</span>
+
+<span class="comment"># Step 2 — Rules</span>
+<span class="path">core/domain/mercenary.py</span>        <span class="comment">← can_sign_contract(), validate_contract_terms()</span>
+
+<span class="comment"># Step 3 — Flow</span>
+<span class="path">sequences/mercenary_flow.py</span>     <span class="comment">← DM negotiation conversation</span>
+
+<span class="comment"># Step 4 — Interface</span>
+<span class="path">cogs/mercenary_cog.py</span>           <span class="comment">← /contract sign slash command</span>
+
+<span class="comment"># Optional — UI</span>
+<span class="path">core/shared/mercenary_embeds.py</span> <span class="comment">← embed builders if needed</span></code></pre>
+
+    <p>This is the architecture working as intended. New systems slot in without touching existing code.</p>
+
+    <h3>The Organization System (Real Example)</h3>
+    <p>The organization layer added in v2 followed exactly this pattern:</p>
+    <pre><code><span class="path">core/data/guild_repo.py</span>         <span class="comment">← get_organizations(), add_organization(), remove_organization()</span>
+<span class="path">core/shared/faction_picker.py</span>   <span class="comment">← merged theme factions + custom orgs in one picker</span>
+<span class="path">cogs/admin_cog.py</span>               <span class="comment">← /admin org add · list · remove</span></code></pre>
+    <p>No changes to Domain, Math, or any Sequence. Three files, zero regressions.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>E.R.I.S. — Engagement Resource &amp; Intelligence System &nbsp;·&nbsp;
+  <a href="https://github.com/GalenMars/eris-bot">github.com/GalenMars/eris-bot</a> &nbsp;·&nbsp;
+  MIT License &nbsp;·&nbsp; Built with too much hot cocoa ⚔️</p>
+</footer>
+
+</body>
+</html>

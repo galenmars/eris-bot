@@ -1,0 +1,1178 @@
+{
+  "theme_name": "Star Wars: Old Republic",
+  "theme_version": "0.1",
+  "description": "Default theme for the Deep Stellar Coalition. Set during the Old Republic era — Republic vs Sith Empire and neutral factions.",
+  "author": "Deep Stellar Coalition",
+  "tiers": {
+    "1": {
+      "label": "Tier I",
+      "description": "Entry level commanders. Limited EMS pool. Small ships and basic ground forces only.",
+      "max_ship_ems": 50,
+      "max_ground_ems": 30
+    },
+    "2": {
+      "label": "Tier II",
+      "description": "Experienced officers. Medium EMS pool. Mid-range ships and advanced ground forces.",
+      "max_ship_ems": 150,
+      "max_ground_ems": 50
+    },
+    "3": {
+      "label": "Tier III",
+      "description": "Command level. Full EMS pool. All ships and ground forces unlocked.",
+      "max_ship_ems": 750,
+      "max_ground_ems": 180
+    }
+  },
+  "battle_sizes": [
+    {
+      "id": "brawl",
+      "name": "Brawl",
+      "flavor": "A skirmish between small forces. Quick and brutal.",
+      "ems_table_index": 9,
+      "max_rounds": 9
+    },
+    {
+      "id": "firefight",
+      "name": "Firefight",
+      "flavor": "A tactical engagement between organized units.",
+      "ems_table_index": 9,
+      "max_rounds": 9
+    },
+    {
+      "id": "skirmish",
+      "name": "Skirmish",
+      "flavor": "A mid-scale battle with real strategic stakes.",
+      "ems_table_index": 9,
+      "max_rounds": 9
+    },
+    {
+      "id": "engagement",
+      "name": "Engagement",
+      "flavor": "A full engagement between major forces.",
+      "ems_table_index": 9,
+      "max_rounds": 9
+    },
+    {
+      "id": "battleground",
+      "name": "Battleground",
+      "flavor": "A decisive battle that shapes the fate of the campaign.",
+      "ems_table_index": 9,
+      "max_rounds": 9
+    }
+  ],
+  "tactics": [
+    {
+      "id": "cautious",
+      "name": "Cautious",
+      "bonus": 0,
+      "description": "No risk, no reward. Play it safe."
+    },
+    {
+      "id": "defensive",
+      "name": "Defensive",
+      "bonus": 1,
+      "description": "Hold the line. Modest advantage."
+    },
+    {
+      "id": "aggressive",
+      "name": "Aggressive",
+      "bonus": 2,
+      "description": "Push hard. Meaningful advantage with manageable risk."
+    },
+    {
+      "id": "risky",
+      "name": "Risky",
+      "bonus": 3,
+      "description": "All or nothing. Maximum bonus but dangerous in an even fight."
+    }
+  ],
+  "space_force_types": {
+    "combat": {
+      "label": "Combat",
+      "description": "Firepower and Hull dominant. Built for direct engagement and sustained punishment.",
+      "strongest_against": "picket",
+      "weakest_against": "carrier",
+      "color": "#ff6b35"
+    },
+    "carrier": {
+      "label": "Carrier",
+      "description": "Capacity dominant. Deploys fighter wings and support craft. Overwhelms through numbers and flexibility.",
+      "strongest_against": "combat",
+      "weakest_against": "picket",
+      "color": "#00d4ff"
+    },
+    "picket": {
+      "label": "Picket",
+      "description": "Speed and Agility dominant. Fast, evasive, and lethal against Carriers. Struggles against raw firepower.",
+      "strongest_against": "carrier",
+      "weakest_against": "combat",
+      "color": "#a855f7"
+    },
+    "balanced": {
+      "label": "Balanced",
+      "description": "Even spread across all attributes. No catastrophic losses, no dominant wins. The calculated hedge.",
+      "strongest_against": "none",
+      "weakest_against": "none",
+      "color": "#00ff88"
+    }
+  },
+  "space_matchups": [
+    {
+      "attacker": "combat",
+      "defender": "balanced",
+      "attacker_mod": 1,
+      "defender_mod": -1,
+      "flavor": "Focused firepower overwhelms a generalist fleet."
+    },
+    {
+      "attacker": "combat",
+      "defender": "carrier",
+      "attacker_mod": -2,
+      "defender_mod": 2,
+      "flavor": "Fighter swarms pick apart a combat fleet before it can engage."
+    },
+    {
+      "attacker": "combat",
+      "defender": "picket",
+      "attacker_mod": 2,
+      "defender_mod": -2,
+      "flavor": "Raw firepower shreds fast ships that get too close."
+    },
+    {
+      "attacker": "carrier",
+      "defender": "balanced",
+      "attacker_mod": 1,
+      "defender_mod": -1,
+      "flavor": "Fighter wings provide flexible pressure a generalist fleet struggles to counter."
+    },
+    {
+      "attacker": "carrier",
+      "defender": "combat",
+      "attacker_mod": 2,
+      "defender_mod": -2,
+      "flavor": "Endless fighter waves overwhelm even the heaviest combat vessels."
+    },
+    {
+      "attacker": "carrier",
+      "defender": "picket",
+      "attacker_mod": -2,
+      "defender_mod": 2,
+      "flavor": "Fast picket ships intercept and destroy fighter wings before they deploy."
+    },
+    {
+      "attacker": "picket",
+      "defender": "balanced",
+      "attacker_mod": 1,
+      "defender_mod": -1,
+      "flavor": "Speed and evasion frustrate a generalist fleet."
+    },
+    {
+      "attacker": "picket",
+      "defender": "combat",
+      "attacker_mod": -2,
+      "defender_mod": 2,
+      "flavor": "Combat ships absorb picket fire and return devastating salvos."
+    },
+    {
+      "attacker": "picket",
+      "defender": "carrier",
+      "attacker_mod": 2,
+      "defender_mod": -2,
+      "flavor": "Picket ships tear through carrier screens before fighters can launch."
+    },
+    {
+      "attacker": "balanced",
+      "defender": "balanced",
+      "attacker_mod": 0,
+      "defender_mod": 0,
+      "flavor": "Two generalist fleets — tactics and commanders decide the outcome."
+    }
+  ],
+  "space_ships": [
+    {
+      "id": "starfighter_squad",
+      "name": "Starfighter Squadron",
+      "description": "10 mainline combat strike craft. Individually fragile, collectively lethal.",
+      "unit_count": 10,
+      "ems": 10,
+      "tier": 1,
+      "type": "picket",
+      "attributes": {
+        "speed": 10,
+        "firepower": 3,
+        "hull": 1,
+        "shields": 1,
+        "capacity": 0,
+        "range": 1
+      },
+      "raw_score": 16,
+      "naming": "squadron",
+      "note": "Minimum viable swarm unit. 75 squadrons = 750 EMS = one Super Dreadnought."
+    },
+    {
+      "id": "elite_starfighter_squad",
+      "name": "Elite Starfighter Squadron",
+      "description": "10 elite combat strike craft. Better pilots, better ships, exponentially more dangerous.",
+      "unit_count": 10,
+      "ems": 20,
+      "tier": 1,
+      "type": "picket",
+      "attributes": {
+        "speed": 10,
+        "firepower": 6,
+        "hull": 3,
+        "shields": 3,
+        "capacity": 0,
+        "range": 2
+      },
+      "raw_score": 24,
+      "naming": "squadron",
+      "note": "2x base cost. Same count, exponentially higher threat."
+    },
+    {
+      "id": "legendary_starfighter_squad",
+      "name": "Legendary Starfighter Squadron",
+      "description": "10 legendary pilots. The best in the galaxy. Near capital ship threat at fighter speed.",
+      "unit_count": 10,
+      "ems": 30,
+      "tier": 2,
+      "type": "picket",
+      "attributes": {
+        "speed": 10,
+        "firepower": 9,
+        "hull": 5,
+        "shields": 5,
+        "capacity": 0,
+        "range": 3
+      },
+      "raw_score": 32,
+      "naming": "squadron",
+      "note": "3x base cost. Vader's wing level. Tier 2 minimum."
+    },
+    {
+      "id": "corvette",
+      "name": "Corvette",
+      "description": "Light mainline combat warship 100-200m. Fast hit-and-run. Individually fragile, dangerous in numbers.",
+      "unit_count": 1,
+      "ems": 20,
+      "tier": 1,
+      "type": "picket",
+      "attributes": {
+        "speed": 7,
+        "firepower": 3,
+        "hull": 2,
+        "shields": 3,
+        "capacity": 0,
+        "range": 3
+      },
+      "raw_score": 18,
+      "naming": "individual",
+      "note": "Fast asset. Commits to Picket ratio."
+    },
+    {
+      "id": "frigate",
+      "name": "Frigate",
+      "description": "Medium combat vessel 200-300m. Versatile and multirole. The workhorse of any fleet.",
+      "unit_count": 1,
+      "ems": 30,
+      "tier": 1,
+      "type": "balanced",
+      "attributes": {
+        "speed": 6,
+        "firepower": 4,
+        "hull": 4,
+        "shields": 4,
+        "capacity": 0,
+        "range": 5
+      },
+      "raw_score": 23,
+      "naming": "individual",
+      "note": "True generalist. Contributes to Balanced ratio."
+    },
+    {
+      "id": "light_cruiser",
+      "name": "Light Cruiser",
+      "description": "Heavier warship 300-400m. Supports larger vessels. Perfectly even attribute spread.",
+      "unit_count": 1,
+      "ems": 50,
+      "tier": 1,
+      "type": "balanced",
+      "attributes": {
+        "speed": 5,
+        "firepower": 5,
+        "hull": 5,
+        "shields": 5,
+        "capacity": 1,
+        "range": 6
+      },
+      "raw_score": 27,
+      "naming": "individual",
+      "note": "Perfectly balanced. Max Tier 1 ship."
+    },
+    {
+      "id": "escort_carrier",
+      "name": "Escort Carrier",
+      "description": "Light economic carrier vessel. Primarily designed to host starfighters. Capacity over firepower.",
+      "unit_count": 1,
+      "ems": 70,
+      "tier": 2,
+      "type": "carrier",
+      "attributes": {
+        "speed": 4,
+        "firepower": 3,
+        "hull": 5,
+        "shields": 5,
+        "capacity": 8,
+        "range": 4
+      },
+      "raw_score": 29,
+      "naming": "individual",
+      "note": "Entry level Carrier type. High capacity, vulnerable without escort."
+    },
+    {
+      "id": "heavy_cruiser",
+      "name": "Heavy Cruiser",
+      "description": "Larger warship 400-600m. Backbone of most fleets. Firepower and Hull dominant.",
+      "unit_count": 1,
+      "ems": 70,
+      "tier": 2,
+      "type": "combat",
+      "attributes": {
+        "speed": 4,
+        "firepower": 7,
+        "hull": 7,
+        "shields": 6,
+        "capacity": 2,
+        "range": 6
+      },
+      "raw_score": 32,
+      "naming": "individual",
+      "note": "Same cost as Escort Carrier, completely different role. Combat backbone."
+    },
+    {
+      "id": "battlecruiser",
+      "name": "Battlecruiser",
+      "description": "Heavy capital ship 600-700m. Speed and firepower over durability. The aggressive option.",
+      "unit_count": 1,
+      "ems": 100,
+      "tier": 2,
+      "type": "combat",
+      "attributes": {
+        "speed": 3,
+        "firepower": 8,
+        "hull": 7,
+        "shields": 7,
+        "capacity": 2,
+        "range": 7
+      },
+      "raw_score": 34,
+      "naming": "individual",
+      "note": "First true capital ship. Tier 2 cornerstone."
+    },
+    {
+      "id": "battleship",
+      "name": "Battleship",
+      "description": "Heavy mainline capital ship. Large gun batteries. Built to absorb and deliver punishment.",
+      "unit_count": 1,
+      "ems": 150,
+      "tier": 2,
+      "type": "combat",
+      "attributes": {
+        "speed": 2,
+        "firepower": 9,
+        "hull": 9,
+        "shields": 8,
+        "capacity": 1,
+        "range": 8
+      },
+      "raw_score": 37,
+      "naming": "individual",
+      "note": "Peak Tier 2 combat ship. Slow, devastating, hard to kill."
+    },
+    {
+      "id": "fleet_carrier",
+      "name": "Fleet Carrier",
+      "description": "Heavy starfighter carrier. Centerpiece of a Carrier fleet. Maximum capacity.",
+      "unit_count": 1,
+      "ems": 150,
+      "tier": 2,
+      "type": "carrier",
+      "attributes": {
+        "speed": 3,
+        "firepower": 4,
+        "hull": 7,
+        "shields": 7,
+        "capacity": 10,
+        "range": 4
+      },
+      "raw_score": 35,
+      "naming": "individual",
+      "note": "Same cost as Battleship. Maximum capacity score. Needs escort to survive."
+    },
+    {
+      "id": "dreadnought",
+      "name": "Dreadnought",
+      "description": "Large command vessel 5000m+. Heavy gun batteries. Orbital bombardment capable.",
+      "unit_count": 1,
+      "ems": 200,
+      "tier": 3,
+      "type": "combat",
+      "attributes": {
+        "speed": 2,
+        "firepower": 9,
+        "hull": 9,
+        "shields": 8,
+        "capacity": 3,
+        "range": 8
+      },
+      "raw_score": 39,
+      "naming": "individual",
+      "note": "First Tier 3 ship. Losing this is a campaign event."
+    },
+    {
+      "id": "heavy_dreadnought",
+      "name": "Heavy Dreadnought",
+      "description": "Imposing capital class. Maximum firepower and hull. Near indestructible gun platform.",
+      "unit_count": 1,
+      "ems": 500,
+      "tier": 3,
+      "type": "combat",
+      "attributes": {
+        "speed": 1,
+        "firepower": 10,
+        "hull": 10,
+        "shields": 9,
+        "capacity": 4,
+        "range": 9
+      },
+      "raw_score": 43,
+      "naming": "individual",
+      "note": "Near maximum everything except speed and capacity. 500 EMS commitment."
+    },
+    {
+      "id": "super_dreadnought",
+      "name": "Super Dreadnought",
+      "description": "6-7km mobile fortress and fleet command vessel. Carries entire armies. The boss ship.",
+      "unit_count": 1,
+      "ems": 750,
+      "tier": 3,
+      "type": "choice",
+      "type_options": [
+        "combat",
+        "carrier"
+      ],
+      "attributes": {
+        "speed": 1,
+        "firepower": 10,
+        "hull": 10,
+        "shields": 9,
+        "capacity": 8,
+        "range": 9
+      },
+      "raw_score": 47,
+      "naming": "individual",
+      "note": "Commander declares Combat or Carrier at battle time. Choice is secret until results post. Appearing in a campaign is a narrative event."
+    }
+  ],
+  "ground_force_types": {
+    "infantry": {
+      "label": "Infantry",
+      "description": "Fast, mobile, and disciplined. Excels against Heavy Armor through numbers and flanking. Vulnerable to Mechanized forces.",
+      "strongest_against": "heavy_armor",
+      "weakest_against": "mechanized",
+      "color": "#00ff88"
+    },
+    "mechanized": {
+      "label": "Mechanized/AI",
+      "description": "Walkers, droids, repulsorlift, and artillery. Range and firepower dominant. Shreds Infantry but vulnerable to Heavy Armor.",
+      "strongest_against": "infantry",
+      "weakest_against": "heavy_armor",
+      "color": "#00d4ff"
+    },
+    "heavy_armor": {
+      "label": "Heavy Armor",
+      "description": "Tanks and behemoth vehicles. Near indestructible. Destroys Mechanized forces but slow and vulnerable to Infantry flanking.",
+      "strongest_against": "mechanized",
+      "weakest_against": "infantry",
+      "color": "#ff6b35"
+    },
+    "combined_arms": {
+      "label": "Combined Arms",
+      "description": "Balanced mix of infantry and armor. No catastrophic losses, no dominant wins. The calculated hedge.",
+      "strongest_against": "none",
+      "weakest_against": "none",
+      "color": "#a855f7"
+    }
+  },
+  "ground_matchups": [
+    {
+      "attacker": "infantry",
+      "defender": "combined_arms",
+      "attacker_mod": 1,
+      "defender_mod": -1,
+      "flavor": "Disciplined infantry finds gaps in a mixed force."
+    },
+    {
+      "attacker": "infantry",
+      "defender": "mechanized",
+      "attacker_mod": -2,
+      "defender_mod": 2,
+      "flavor": "Walkers and droids cut through infantry before they can close the distance."
+    },
+    {
+      "attacker": "infantry",
+      "defender": "heavy_armor",
+      "attacker_mod": 2,
+      "defender_mod": -2,
+      "flavor": "Infantry swarms flank and overwhelm slow heavy armor."
+    },
+    {
+      "attacker": "mechanized",
+      "defender": "combined_arms",
+      "attacker_mod": 1,
+      "defender_mod": -1,
+      "flavor": "Mechanized firepower and range pressures a generalist force."
+    },
+    {
+      "attacker": "mechanized",
+      "defender": "infantry",
+      "attacker_mod": 2,
+      "defender_mod": -2,
+      "flavor": "Walkers and artillery destroy infantry formations at range."
+    },
+    {
+      "attacker": "mechanized",
+      "defender": "heavy_armor",
+      "attacker_mod": -2,
+      "defender_mod": 2,
+      "flavor": "Heavy armor shrugs off mechanized fire and crushes them."
+    },
+    {
+      "attacker": "heavy_armor",
+      "defender": "combined_arms",
+      "attacker_mod": 1,
+      "defender_mod": -1,
+      "flavor": "Raw armor superiority overwhelms a mixed force."
+    },
+    {
+      "attacker": "heavy_armor",
+      "defender": "infantry",
+      "attacker_mod": -2,
+      "defender_mod": 2,
+      "flavor": "Infantry flanks and swarms heavy armor from all sides."
+    },
+    {
+      "attacker": "heavy_armor",
+      "defender": "mechanized",
+      "attacker_mod": 2,
+      "defender_mod": -2,
+      "flavor": "Heavy armor rolls through mechanized units without slowing."
+    },
+    {
+      "attacker": "combined_arms",
+      "defender": "combined_arms",
+      "attacker_mod": 0,
+      "defender_mod": 0,
+      "flavor": "Two balanced forces — tactics and commanders decide the outcome."
+    }
+  ],
+  "ground_forces": [
+    {
+      "id": "infantry_squad",
+      "name": "Infantry Squad",
+      "description": "9 soldiers + 1 squad leader. The atomic unit of ground warfare.",
+      "unit_count": 10,
+      "ems": 10,
+      "tier": 1,
+      "type": "infantry",
+      "attributes": {
+        "speed": 7,
+        "firepower": 3,
+        "armor": 2,
+        "morale": 5,
+        "capacity": 2,
+        "range": 3
+      },
+      "raw_score": 22,
+      "naming": "squad",
+      "force_user": false
+    },
+    {
+      "id": "speeder_bike_squad",
+      "name": "Speeder Bike Squad",
+      "description": "Fast reconnaissance and harassment unit. Maximum mobility, minimal protection.",
+      "unit_count": 1,
+      "ems": 15,
+      "tier": 1,
+      "type": "infantry",
+      "attributes": {
+        "speed": 9,
+        "firepower": 4,
+        "armor": 2,
+        "morale": 5,
+        "capacity": 1,
+        "range": 2
+      },
+      "raw_score": 23,
+      "naming": "squad",
+      "force_user": false
+    },
+    {
+      "id": "infantry_platoon",
+      "name": "Infantry Platoon",
+      "description": "4 squads of soldiers. ~36 troops. First real area control unit.",
+      "unit_count": 36,
+      "ems": 20,
+      "tier": 1,
+      "type": "infantry",
+      "attributes": {
+        "speed": 7,
+        "firepower": 4,
+        "armor": 3,
+        "morale": 5,
+        "capacity": 4,
+        "range": 3
+      },
+      "raw_score": 26,
+      "naming": "squad",
+      "force_user": false
+    },
+    {
+      "id": "apprentice_padawan",
+      "name": "Apprentice / Padawan",
+      "description": "A Force-sensitive in training. Powerful individual, limited battlefield presence.",
+      "unit_count": 1,
+      "ems": 20,
+      "tier": 1,
+      "type": "choice",
+      "type_options": [
+        "infantry",
+        "combined_arms"
+      ],
+      "attributes": {
+        "speed": 8,
+        "firepower": 5,
+        "armor": 3,
+        "morale": 6,
+        "capacity": 1,
+        "range": 4
+      },
+      "raw_score": 27,
+      "naming": "individual",
+      "force_user": true,
+      "force_tier": 1,
+      "note": "Commander declares Infantry or Combined Arms at battle time. Tier 1 force user attachment."
+    },
+    {
+      "id": "specforce_squad",
+      "name": "SpecForce Squad",
+      "description": "Elite special operations unit. High morale, sniper capability, precision strikes.",
+      "unit_count": 4,
+      "ems": 30,
+      "tier": 1,
+      "type": "infantry",
+      "attributes": {
+        "speed": 8,
+        "firepower": 6,
+        "armor": 4,
+        "morale": 8,
+        "capacity": 2,
+        "range": 6
+      },
+      "raw_score": 34,
+      "naming": "squad",
+      "force_user": false
+    },
+    {
+      "id": "light_tank_walker",
+      "name": "Light Tank / Walker Platoon",
+      "description": "Light armored vehicles. Support role. Bridges infantry and heavy armor.",
+      "unit_count": 1,
+      "ems": 30,
+      "tier": 1,
+      "type": "combined_arms",
+      "attributes": {
+        "speed": 5,
+        "firepower": 6,
+        "armor": 6,
+        "morale": 5,
+        "capacity": 3,
+        "range": 5
+      },
+      "raw_score": 30,
+      "naming": "individual",
+      "force_user": false
+    },
+    {
+      "id": "lord_knight",
+      "name": "Lord / Knight",
+      "description": "A trained Force user of significant power. Fearsome on the battlefield.",
+      "unit_count": 1,
+      "ems": 30,
+      "tier": 2,
+      "type": "choice",
+      "type_options": [
+        "infantry",
+        "combined_arms"
+      ],
+      "attributes": {
+        "speed": 7,
+        "firepower": 7,
+        "armor": 5,
+        "morale": 8,
+        "capacity": 1,
+        "range": 4
+      },
+      "raw_score": 32,
+      "naming": "individual",
+      "force_user": true,
+      "force_tier": 2,
+      "note": "Commander declares Infantry or Combined Arms at battle time. Tier 2 force user attachment."
+    },
+    {
+      "id": "artillery_battery",
+      "name": "Artillery Battery",
+      "description": "Heavy indirect fire platform. Devastates anything at extreme range. Fragile up close.",
+      "unit_count": 1,
+      "ems": 40,
+      "tier": 2,
+      "type": "mechanized",
+      "attributes": {
+        "speed": 2,
+        "firepower": 8,
+        "armor": 4,
+        "morale": 5,
+        "capacity": 2,
+        "range": 9
+      },
+      "raw_score": 30,
+      "naming": "individual",
+      "force_user": false,
+      "note": "Range 9 is the differentiator. Capital ship-scale turbolasers. Best unit against anything at range."
+    },
+    {
+      "id": "medium_tank_walker",
+      "name": "Medium Tank / Walker Platoon",
+      "description": "Core armored unit. Solid firepower, solid armor. The backbone of a Heavy Armor force.",
+      "unit_count": 1,
+      "ems": 40,
+      "tier": 2,
+      "type": "heavy_armor",
+      "attributes": {
+        "speed": 4,
+        "firepower": 7,
+        "armor": 7,
+        "morale": 5,
+        "capacity": 4,
+        "range": 5
+      },
+      "raw_score": 32,
+      "naming": "individual",
+      "force_user": false
+    },
+    {
+      "id": "darth",
+      "name": "Darth",
+      "description": "A Sith Lord of immense power. The most dangerous individual on any battlefield. A boss fight.",
+      "unit_count": 1,
+      "ems": 45,
+      "tier": 3,
+      "type": "choice",
+      "type_options": [
+        "infantry",
+        "mechanized",
+        "heavy_armor",
+        "combined_arms"
+      ],
+      "attributes": {
+        "speed": 7,
+        "firepower": 9,
+        "armor": 6,
+        "morale": 10,
+        "capacity": 1,
+        "range": 5
+      },
+      "raw_score": 38,
+      "naming": "individual",
+      "force_user": true,
+      "force_tier": 3,
+      "note": "Commander declares ANY type at battle time. Choice is secret until results post. Maximum one per army. Tier 3 only."
+    },
+    {
+      "id": "heavy_tank_walker",
+      "name": "Heavy Tank / Walker Platoon",
+      "description": "Massive armored vehicles. Near indestructible. Slow but devastating.",
+      "unit_count": 1,
+      "ems": 50,
+      "tier": 2,
+      "type": "heavy_armor",
+      "attributes": {
+        "speed": 3,
+        "firepower": 8,
+        "armor": 9,
+        "morale": 5,
+        "capacity": 5,
+        "range": 5
+      },
+      "raw_score": 35,
+      "naming": "individual",
+      "force_user": false
+    },
+    {
+      "id": "close_air_support",
+      "name": "Close-Air-Support Patrol",
+      "description": "Atmospheric gunships providing direct air support. Fast, flexible, high range.",
+      "unit_count": 1,
+      "ems": 50,
+      "tier": 2,
+      "type": "mechanized",
+      "attributes": {
+        "speed": 8,
+        "firepower": 7,
+        "armor": 4,
+        "morale": 6,
+        "capacity": 2,
+        "range": 7
+      },
+      "raw_score": 34,
+      "naming": "individual",
+      "force_user": false,
+      "note": "Same cost as Heavy Tank. Completely different role. Speed and range vs raw armor."
+    },
+    {
+      "id": "infantry_company",
+      "name": "Infantry Company",
+      "description": "4 platoons. ~144 soldiers. Serious area control and sustained presence.",
+      "unit_count": 144,
+      "ems": 60,
+      "tier": 2,
+      "type": "infantry",
+      "attributes": {
+        "speed": 6,
+        "firepower": 5,
+        "armor": 5,
+        "morale": 7,
+        "capacity": 7,
+        "range": 3
+      },
+      "raw_score": 33,
+      "naming": "squad",
+      "force_user": false
+    },
+    {
+      "id": "behemoth_vehicle",
+      "name": "Behemoth Vehicle",
+      "description": "Massive exotic war machine. Maximum armor. Terrifying psychological impact.",
+      "unit_count": 1,
+      "ems": 100,
+      "tier": 3,
+      "type": "heavy_armor",
+      "attributes": {
+        "speed": 2,
+        "firepower": 9,
+        "armor": 10,
+        "morale": 5,
+        "capacity": 6,
+        "range": 7
+      },
+      "raw_score": 39,
+      "naming": "individual",
+      "force_user": false,
+      "note": "Losing this is a campaign event. Maximum armor score."
+    },
+    {
+      "id": "infantry_battalion",
+      "name": "Infantry Battalion",
+      "description": "4 companies. ~576 soldiers. The largest deployable infantry force. Maximum area control.",
+      "unit_count": 576,
+      "ems": 180,
+      "tier": 3,
+      "type": "combined_arms",
+      "attributes": {
+        "speed": 5,
+        "firepower": 6,
+        "armor": 7,
+        "morale": 8,
+        "capacity": 10,
+        "range": 3
+      },
+      "raw_score": 39,
+      "naming": "squad",
+      "force_user": false,
+      "note": "Same raw score as Behemoth. Completely different. Numbers vs individual power."
+    }
+  ],
+  "force_user_rules": {
+    "description": "Force users are tier-gated attachments to any army. They contribute EMS to their declared type.",
+    "rules": [
+      "You cannot field a Force user equal to or above your own rank tier.",
+      "Maximum one Darth per army.",
+      "Force user type choice is locked at battle declaration and secret until results post.",
+      "Force user EMS counts toward the ratio of their declared type."
+    ],
+    "tier_access": {
+      "1": [
+        "apprentice_padawan"
+      ],
+      "2": [
+        "apprentice_padawan",
+        "lord_knight"
+      ],
+      "3": [
+        "apprentice_padawan",
+        "lord_knight",
+        "darth"
+      ]
+    }
+  },
+  "factions": [
+    {
+      "id": "galactic_republic",
+      "name": "Galactic Republic",
+      "group": "republic",
+      "preferred_space_type": "carrier",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "jedi_order",
+      "name": "Jedi Order",
+      "group": "republic",
+      "preferred_space_type": "carrier",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "republic_sis",
+      "name": "Republic SIS",
+      "group": "republic",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "republic_military",
+      "name": "Republic Military",
+      "group": "republic",
+      "preferred_space_type": "carrier",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "sith_empire",
+      "name": "Sith Empire",
+      "group": "empire",
+      "preferred_space_type": "combat",
+      "preferred_ground_type": "heavy_armor"
+    },
+    {
+      "id": "sith_order",
+      "name": "Sith Order / Dark Council",
+      "group": "empire",
+      "preferred_space_type": "combat",
+      "preferred_ground_type": "heavy_armor"
+    },
+    {
+      "id": "imperial_intelligence",
+      "name": "Imperial Intelligence",
+      "group": "empire",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "imperial_military",
+      "name": "Imperial Military",
+      "group": "empire",
+      "preferred_space_type": "combat",
+      "preferred_ground_type": "heavy_armor"
+    },
+    {
+      "id": "chiss_ascendancy",
+      "name": "Chiss Ascendancy",
+      "group": "sovereign",
+      "preferred_space_type": "picket",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "hapes_consortium",
+      "name": "Hapes Consortium",
+      "group": "sovereign",
+      "preferred_space_type": "combat",
+      "preferred_ground_type": null
+    },
+    {
+      "id": "eternal_empire",
+      "name": "Eternal Empire of Zakuul",
+      "group": "sovereign",
+      "preferred_space_type": "combat",
+      "preferred_ground_type": "mechanized"
+    },
+    {
+      "id": "mandalorians",
+      "name": "Mandalorian clans",
+      "group": "sovereign",
+      "preferred_space_type": "picket",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "hutt_cartel",
+      "name": "Hutt Cartel",
+      "group": "criminal",
+      "preferred_space_type": "balanced",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "the_exchange",
+      "name": "The Exchange",
+      "group": "criminal",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "genoharadan",
+      "name": "GenoHaradan",
+      "group": "criminal",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "czerka",
+      "name": "Czerka Corporation",
+      "group": "criminal",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "black_sun",
+      "name": "Black Sun",
+      "group": "criminal",
+      "preferred_space_type": "picket",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "zann_consortium",
+      "name": "Zann Consortium",
+      "group": "criminal",
+      "preferred_space_type": "picket",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "bounty_hunters_guild",
+      "name": "Bounty Hunters Guild",
+      "group": "criminal",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "corellian_syndicate",
+      "name": "Corellian Syndicate",
+      "group": "criminal",
+      "preferred_space_type": "picket",
+      "preferred_ground_type": null
+    },
+    {
+      "id": "outer_rim_pirates",
+      "name": "Outer Rim pirates",
+      "group": "criminal",
+      "preferred_space_type": "picket",
+      "preferred_ground_type": null
+    },
+    {
+      "id": "revanites",
+      "name": "The Revanites",
+      "group": "force",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "sith_triumvirate",
+      "name": "Sith Triumvirate",
+      "group": "force",
+      "preferred_space_type": "combat",
+      "preferred_ground_type": "heavy_armor"
+    },
+    {
+      "id": "children_of_emperor",
+      "name": "Children of the Emperor",
+      "group": "force",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "scions_of_zakuul",
+      "name": "Scions of Zakuul",
+      "group": "force",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "jedi_covenant",
+      "name": "Jedi Covenant",
+      "group": "force",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "order_of_zildrog",
+      "name": "Order of Zildrog",
+      "group": "force",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "eternal_alliance",
+      "name": "Eternal Alliance",
+      "group": "planetary",
+      "preferred_space_type": "balanced",
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "rakata",
+      "name": "Rakata / Infinite Empire",
+      "group": "planetary",
+      "preferred_space_type": "combat",
+      "preferred_ground_type": "heavy_armor"
+    },
+    {
+      "id": "wookiees",
+      "name": "Wookiee tribes",
+      "group": "planetary",
+      "preferred_space_type": null,
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "resistance",
+      "name": "Resistance movements",
+      "aliases": ["balmorra", "corellian resistance", "balmorran resistance", "taris underground"],
+      "group": "planetary",
+      "preferred_space_type": null,
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "order_of_shasa",
+      "name": "Order of Shasa",
+      "group": "planetary",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    },
+    {
+      "id": "sand_people",
+      "name": "Sand People",
+      "group": "planetary",
+      "preferred_space_type": null,
+      "preferred_ground_type": "combined_arms"
+    },
+    {
+      "id": "neutral",
+      "name": "Neutral / Independent",
+      "group": "independent",
+      "preferred_space_type": null,
+      "preferred_ground_type": null
+    }
+  ],
+  "alignment_groups": {
+    "republic": "🔵",
+    "empire": "🔴",
+    "sovereign": "🟢",
+    "criminal": "🟡",
+    "force": "🟣",
+    "planetary": "🟠",
+    "independent": "⚪"
+  }
+}

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E.R.I.S. — Command Matrix</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #060a10;
+  --sur:   #0d1117;
+  --sur2:  #111822;
+  --sur3:  #171f2d;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text:  #c9d1d9;
+  --muted: #6e7681;
+  --dim:   #2e3540;
+
+  /* permission tiers */
+  --p-owner:   #fbbf24; --p-owner-rgb:   251,191,36;
+  --p-player:  #38bdf8; --p-player-rgb:  56,189,248;
+  --p-creator: #a78bfa; --p-creator-rgb: 167,139,250;
+  --p-admin:   #f87171; --p-admin-rgb:   248,113,113;
+  --p-dev:     #fb923c; --p-dev-rgb:     251,146,60;
+  --p-wip:     #6e7681; --p-wip-rgb:     110,118,129;
+
+  /* sub-category accents (within player) */
+  --sub-cmd:   #38bdf8;
+  --sub-battle:#34d399;
+  --sub-ems:   #60a5fa;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; scroll-padding-top:64px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 28px 100px;
+}
+
+/* ── Header ─────────────────────────────── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(6,10,16,0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+}
+
+.header-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  gap: 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--p-player);
+  letter-spacing: 3px;
+}
+
+.logo-div { width:1px; height:18px; background:var(--border2); }
+
+.logo-sub {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+}
+
+nav { display:flex; gap:2px; }
+
+nav a {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 5px;
+  letter-spacing: 0.3px;
+  transition: all .15s;
+}
+
+nav a:hover { color:var(--text); background:var(--sur3); }
+
+/* ── Hero ────────────────────────────────── */
+.hero {
+  padding: 64px 0 52px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 52px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--p-player);
+  background: rgba(var(--p-player-rgb),0.08);
+  border: 1px solid rgba(var(--p-player-rgb),0.22);
+  padding: 5px 12px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.badge-dot {
+  width: 6px; height: 6px;
+  background: var(--p-player);
+  border-radius: 50%;
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(56,189,248,0.5)}
+  50%{opacity:.5;box-shadow:0 0 0 4px rgba(56,189,248,0)}
+}
+
+h1 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #e6edf3;
+  line-height: 1.05;
+  margin-bottom: 16px;
+}
+
+h1 em { font-style:normal; color:var(--p-player); }
+
+.hero-sub {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.75;
+}
+
+/* ── Permission legend ───────────────────── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 48px;
+}
+
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: var(--muted);
+  padding: 5px 11px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--sur);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.leg-item:hover { border-color:var(--border2); color:var(--text); }
+
+.leg-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.leg-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  opacity: .5;
+}
+
+/* ── Section header ───────────────────────── */
+.section-hd {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.section-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.section-line { flex:1; height:1px; background:var(--border); }
+
+/* ── Tier blocks ─────────────────────────── */
+.tier {
+  margin-bottom: 52px;
+}
+
+.tier-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  background: var(--sur);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--tc);
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+  position: relative;
+}
+
+.tier-icon {
+  width: 40px; height: 40px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: rgba(var(--tc-rgb),0.1);
+  color: var(--tc);
+  border: 1px solid rgba(var(--tc-rgb),0.22);
+  flex-shrink: 0;
+}
+
+.tier-meta { flex:1; }
+
+.tier-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #e6edf3;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.tier-access {
+  font-size: 11px;
+  color: var(--tc);
+  opacity: .75;
+  margin-top: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.3px;
+}
+
+.tier-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 3px;
+  background: rgba(var(--tc-rgb),0.1);
+  color: var(--tc);
+  border: 1px solid rgba(var(--tc-rgb),0.22);
+}
+
+.tier-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── Sub-category ─────────────────────────── */
+.sub-section {
+  background: var(--sur);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.sub-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--sur2);
+}
+
+.sub-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.sub-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Command rows ─────────────────────────── */
+.cmd-table {
+  background: var(--sur);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+}
+
+.cmd-table:last-child,
+.tier-foot + .cmd-table {
+  border-bottom: none;
+}
+
+.cmd-row {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 22px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.cmd-row:hover { background: rgba(255,255,255,0.02); }
+.cmd-row.on    { background: rgba(var(--tc-rgb),0.04); }
+.cmd-row:last-child { border-bottom: none; }
+
+.cmd-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tc);
+  transition: color .15s;
+  white-space: nowrap;
+}
+
+.cmd-row:hover .cmd-name { color: var(--tc); opacity:.85; }
+
+.cmd-purpose {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+  transition: color .15s;
+}
+
+.cmd-row.on .cmd-purpose { color: var(--text); }
+
+.cmd-args {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.arg-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--muted);
+  background: var(--sur3);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.arg-optional { opacity:.6; }
+
+.arg-none {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: .5px;
+}
+
+/* ── Expanded detail ────────────────────── */
+.cmd-detail {
+  display: none;
+  padding: 10px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(var(--tc-rgb),0.03);
+}
+
+.cmd-row.on + .cmd-detail { display:block; }
+
+.detail-inner {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.detail-block { flex:1; min-width:160px; }
+
+.detail-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.detail-val {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.detail-arg {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--tc);
+  background: rgba(var(--tc-rgb),0.08);
+  border: 1px solid rgba(var(--tc-rgb),0.2);
+  padding: 3px 9px;
+  border-radius: 4px;
+  margin-right: 5px;
+  margin-bottom: 4px;
+}
+
+.detail-arg.optional { opacity:.65; }
+
+/* ── Tier footer ───────────────────────── */
+.tier-foot {
+  background: var(--sur);
+  border: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  height: 8px;
+}
+
+/* ── WIP section ───────────────────────── */
+.wip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin-bottom: 52px;
+}
+
+.wip-card {
+  background: var(--sur);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--p-wip);
+  border-radius: 7px;
+  padding: 15px 18px;
+  opacity: .75;
+}
+
+.wip-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--p-wip);
+  letter-spacing: 0.3px;
+  margin-bottom: 5px;
+}
+
+.wip-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.wip-tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(var(--p-wip-rgb),0.1);
+  color: var(--p-wip);
+  border: 1px solid rgba(var(--p-wip-rgb),0.2);
+  margin-bottom: 8px;
+}
+
+/* ── Footer ─────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 0;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 1.5px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-name">E.R.I.S.</span>
+      <div class="logo-div"></div>
+      <span class="logo-sub">Command Matrix v0.2</span>
+    </div>
+    <nav>
+      <a href="#setup">Setup</a>
+      <a href="#player">Player</a>
+      <a href="#creator">Creator</a>
+      <a href="#admin">Admin</a>
+      <a href="#dev">Developer</a>
+      <a href="#wip">WIP</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge"><div class="badge-dot"></div>Deep Stellar Coalition · Bot Commands</div>
+    <h1>Command<br><em>Matrix</em></h1>
+    <p class="hero-sub">All slash commands organized by permission level. Click any command row to expand arguments and full purpose. Colors indicate clearance tier.</p>
+  </section>
+
+  <!-- Legend -->
+  <div class="legend" id="legend"></div>
+
+  <!-- Tier blocks -->
+  <div id="tiers"></div>
+
+  <!-- WIP -->
+  <section id="wip">
+    <div class="section-hd">
+      <span class="section-label">Work in Progress</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="wip-grid" id="wip-grid"></div>
+  </section>
+
+  <footer>E.R.I.S. · COMMAND MATRIX · v0.2 · DEEP STELLAR COALITION</footer>
+</div>
+
+<script>
+const TIERS = [
+  {
+    id: 'setup',
+    name: 'System Initialization',
+    access: 'Server Owner only',
+    badge: 'Setup',
+    icon: 'SYS',
+    tc: '#fbbf24', rgb: '251,191,36',
+    groups: [
+      {
+        label: null, icon: null,
+        commands: [
+          { cmd: '/setup',        args: [],         purpose: 'Triggers the multi-phase setup sequence: Pre-flight → Creation → Revocation. Run once during onboarding.' },
+          { cmd: '/setup-status', args: [],         purpose: 'Displays which required channels and roles are currently present in the server.' },
+          { cmd: '/setup-reset',  args: [],         purpose: 'Clears the database config record so setup can be run again from scratch.' },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'player',
+    name: 'Player Commands',
+    access: 'Anyone with a Commander',
+    badge: 'Player',
+    icon: 'PLY',
+    tc: '#38bdf8', rgb: '56,189,248',
+    groups: [
+      {
+        label: 'Commander Management', icon: '🎖️',
+        commands: [
+          { cmd: '/commander submit', args: [],                purpose: 'Starts a DM flow to create a new commander identity. Multi-step prompts guide the player through the process.' },
+          { cmd: '/commander view',   args: [{ n:'member', opt:true }],  purpose: 'DMs the user their own commander card. Admins can pass a member argument to view others.' },
+          { cmd: '/commander list',   args: [],                purpose: 'Shows a registry of all active commanders in the server, grouped by faction.' },
+        ]
+      },
+      {
+        label: 'Combat Operations', icon: '⚔️',
+        commands: [
+          { cmd: '/battle engage',  args: [{ n:'@opponent', opt:false }], purpose: 'Challenges another player to a battle in a bound campaign channel.' },
+          { cmd: '/battle roll',    args: [],                             purpose: 'Triggers the roll in an active battle. Bypasses the 3-second slash command timeout.' },
+          { cmd: '/battle status',  args: [],                             purpose: 'Displays the live score and round count for the current channel\'s active battle.' },
+          { cmd: '/battle history', args: [],                             purpose: 'Shows the last 5 completed battles in the current channel.' },
+        ]
+      },
+      {
+        label: 'Logistics — EMS', icon: '📊',
+        commands: [
+          { cmd: '/ems request', args: [],                        purpose: 'Starts a DM flow to request more EMS. Requires admin approval before taking effect. Only available during an active campaign.' },
+          { cmd: '/ems balance', args: [],                        purpose: 'DMs the user the current Fleet and Army EMS totals for their commanders.' },
+          { cmd: '/ems history', args: [{ n:'name', opt:true }],  purpose: 'Shows the last 10 EMS changes (additions and losses) for a specific commander.' },
+          { cmd: '/ems submit',  args: [{ n:'block', opt:false }], purpose: 'Pastes the block generated by the Fleet Builder or Army Builder tool to update a commander\'s force composition. Also used to submit a new block during a refit.' },
+          { cmd: '/ems refit',   args: [],                        purpose: 'Initiates a refit request between campaigns. The bot DMs the player their current block and submission ID. Player then updates their block via the builder tool and resubmits with /ems submit. Admin must approve before the new block takes effect.' },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'creator',
+    name: 'Campaign Creator',
+    access: 'ERIS Creator role or Campaign Owner',
+    badge: 'Creator',
+    icon: 'CRE',
+    tc: '#a78bfa', rgb: '167,139,250',
+    groups: [
+      {
+        label: 'Campaign Lifecycle', icon: '📋',
+        commands: [
+          { cmd: '/campaign create',       args: [],                                                           purpose: 'Multi-step prompt to define a new campaign: Type, EMS limits, Factions, enrollment deadline.' },
+          { cmd: '/campaign announce',     args: [{ n:'name', opt:false }],                                    purpose: 'Posts the enrollment embed with ⚔️ and 🗡️ reactions to #campaign-board.' },
+          { cmd: '/campaign start',        args: [{ n:'name', opt:false }],                                    purpose: 'Locks enrollment, snapshots starting EMS values, and opens the battle log thread.' },
+          { cmd: '/campaign complete',     args: [{ n:'name', opt:false }],                                    purpose: 'Closes the campaign, triggers final results and leaderboard.' },
+          { cmd: '/campaign retreat',      args: [{ n:'name', opt:false }, { n:'side', opt:false }],           purpose: 'Ends a campaign early by declaring a specific side has withdrawn.' },
+          { cmd: '/campaign edit',         args: [{ n:'name', opt:false }],                                    purpose: 'Adjusts campaign settings: EMS totals, enrollment deadline, and other parameters.' },
+          { cmd: '/campaign delete',       args: [{ n:'name', opt:false }],                                    purpose: '⚠️ Permanently wipes a campaign and all its records. Irreversible.' },
+        ]
+      },
+      {
+        label: 'Campaign Channels & Roster', icon: '📡',
+        commands: [
+          { cmd: '/campaign bind',         args: [{ n:'channel', opt:false }, { n:'type', opt:false }],        purpose: 'Binds a channel as a space or ground battle arena for a campaign.' },
+          { cmd: '/campaign unbind',       args: [{ n:'channel', opt:false }],                                 purpose: 'Removes a campaign\'s binding to a specific channel.' },
+          { cmd: '/campaign results-bind', args: [{ n:'channel', opt:false }],                                 purpose: 'Defines the channel where automated battle results are posted.' },
+          { cmd: '/campaign list',         args: [],                                                           purpose: 'Lists all active campaigns and their current enrollments.' },
+          { cmd: '/campaign view',         args: [{ n:'name', opt:false }],                                    purpose: 'Shows deep details of a campaign: progress %, full roster, remaining EMS.' },
+          { cmd: '/campaign roster',       args: [{ n:'name', opt:false }],                                    purpose: 'Shows a clean list of every enrolled commander and their deployed force.' },
+          { cmd: '/campaign progress',     args: [{ n:'name', opt:false }],                                    purpose: 'Manually pushes a progress bar update to the campaign progress thread.' },
+          { cmd: '/campaign ems',          args: [{ n:'name', opt:false }],                                    purpose: 'Views EMS totals and caps per side in the campaign.' },
+        ]
+      },
+      {
+        label: 'Collaborators', icon: '🤝',
+        commands: [
+          { cmd: '/campaign collaborator add',    args: [{ n:'name', opt:false }, { n:'@member', opt:false }], purpose: 'Invites another Creator to co-manage a campaign.' },
+          { cmd: '/campaign collaborator remove', args: [{ n:'name', opt:false }, { n:'@member', opt:false }], purpose: 'Removes a collaborator from a campaign.' },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'admin',
+    name: 'Administrative & Emergency',
+    access: 'ERIS Admin role',
+    badge: 'Admin',
+    icon: 'ADM',
+    tc: '#f87171', rgb: '248,113,113',
+    groups: [
+      {
+        label: 'Configuration', icon: '🛠️',
+        commands: [
+          { cmd: '/admin config view', args: [],                                    purpose: 'Shows all current global settings: Fleet URL, Army URL, Dice string, rank limits, and other config values.' },
+          { cmd: '/admin config set',  args: [{ n:'key', opt:false }, { n:'value', opt:false }], purpose: 'Updates a specific config value. Valid keys: fleet_url, army_url, dice, max_mains, max_seniors, max_juniors, record_channel, submissions_channel, approvals_channel, ems_channel, notification_channel. Owner only.' },
+          { cmd: '/admin rolessync',   args: [{ n:'@member', opt:false }],           purpose: 'Force-syncs a member\'s Discord roles to their current commander status.' },
+          { cmd: '/admin reload',      args: [],                                    purpose: 'Reloads all Python Cog files without restarting the bot. Owner only.' },
+        ]
+      },
+      {
+        label: 'Organizations', icon: '🏛️',
+        commands: [
+          { cmd: '/admin org add',    args: [{ n:'name', opt:false }],  purpose: 'Registers a new organization for this server. Bot DMs the admin a faction picker to assign alignment. Players can then select this org during commander submission alongside the standard faction list.' },
+          { cmd: '/admin org list',   args: [],                         purpose: 'Shows all registered organizations for this server, grouped by alignment.' },
+          { cmd: '/admin org remove', args: [{ n:'name', opt:false }],  purpose: 'Removes a registered organization. Players can no longer select it during submission.' },
+        ]
+      },
+      {
+        label: 'Emergency Overrides', icon: '🚨',
+        commands: [
+          { cmd: '/admin cancel battle', args: [{ n:'channel', opt:true }],                  purpose: 'Instantly voids an active battle and unlocks the involved players.' },
+          { cmd: '/admin clearbattles',  args: [],                                            purpose: '⚠️ NUCLEAR OPTION: Cancels every single active battle across the entire guild.' },
+          { cmd: '/admin cancel request',args: [{ n:'id', opt:false }, { n:'type', opt:false }], purpose: 'Cancels a pending EMS or Commander submission by its ID and type.' },
+          { cmd: '/admin log',           args: [],                                            purpose: 'Displays the last 20 entries from the #eris-admin-log channel.' },
+        ]
+      },
+      {
+        label: 'Approvals', icon: '⚖️',
+        commands: [
+          { cmd: '/ems pending',         args: [],                                             purpose: 'Lists all player EMS requests currently awaiting admin review.' },
+          { cmd: '/ems approve',         args: [{ n:'id', opt:false }],                        purpose: 'Grants the requested EMS and notifies the player via DM.' },
+          { cmd: '/ems deny',            args: [{ n:'id', opt:false }],                        purpose: 'Rejects the EMS request and prompts for a reason to DM to the player.' },
+          { cmd: '/ems adjust',          args: [{ n:'@player', opt:false }],                   purpose: 'Directly adds or subtracts EMS from a player, bypassing the request queue.' },
+          { cmd: '/ems refit_approve',   args: [{ n:'refit_id', opt:false }],                  purpose: 'Approves a pending refit request. Bot validates the new block does not exceed the commander\'s current EMS pool. If it does, auto-denies and notifies the player.' },
+          { cmd: '/ems refit_deny',      args: [{ n:'refit_id', opt:false }, { n:'reason', opt:false }], purpose: 'Denies a pending refit request and DMs the player with the reason.' },
+          { cmd: '/commander edit',      args: [{ n:'name', opt:false }, { n:'field', opt:false }], purpose: 'Manually changes a commander\'s Name, Faction, Status, or LP.' },
+          { cmd: '/commander delete',    args: [{ n:'name', opt:false }],                      purpose: 'Permanently removes a commander and all associated history. Irreversible.' },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'dev',
+    name: 'Bot Developer',
+    access: 'Bot Developer ID only · Global',
+    badge: 'Global',
+    icon: 'DEV',
+    tc: '#fb923c', rgb: '251,146,60',
+    groups: [
+      {
+        label: null, icon: null,
+        commands: [
+          { cmd: '/eris broadcast', args: [{ n:'message', opt:false }], purpose: 'Sends a system-wide announcement to every server currently using E.R.I.S.' },
+        ]
+      }
+    ]
+  },
+];
+
+const WIP = [
+  { title: 'Shop Commands', desc: 'Future /shop view and /shop buy commands for an in-game economy.' },
+  { title: 'NPC Management', desc: 'Commands for Creators to add NPC commanders to a campaign roster.' },
+  { title: 'Campaign Leaderboard', desc: 'Currently automated at end-of-campaign. No manual command to view All-Time stats yet.' },
+  { title: 'Multi-Theme Support', desc: '/admin theme set is not yet implemented. Theme is set via the THEME_PATH environment variable. Only one theme can be active per bot instance.' },
+  { title: '/setup status', desc: 'A read-only command to verify current channel/role bindings without re-running setup.' },
+];
+
+// Legend
+const legEl = document.getElementById('legend');
+TIERS.forEach(t => {
+  const count = t.groups.reduce((s,g)=>s+g.commands.length,0);
+  const d = document.createElement('div');
+  d.className = 'leg-item';
+  d.innerHTML = `<div class="leg-dot" style="background:${t.tc}"></div>${t.name}<span class="leg-count">${count}</span>`;
+  d.onclick = () => document.getElementById(t.id).scrollIntoView({behavior:'smooth'});
+  legEl.appendChild(d);
+});
+
+// Tiers
+const tiersEl = document.getElementById('tiers');
+
+TIERS.forEach(t => {
+  const totalCmds = t.groups.reduce((s,g)=>s+g.commands.length,0);
+  const sec = document.createElement('section');
+  sec.id = t.id;
+  sec.className = 'tier';
+  sec.style.setProperty('--tc', t.tc);
+  sec.style.setProperty('--tc-rgb', t.rgb);
+
+  let groupsHTML = '';
+  t.groups.forEach(g => {
+    if (g.label) {
+      groupsHTML += `<div class="sub-head"><span class="sub-icon">${g.icon}</span><span class="sub-label">${g.label}</span></div>`;
+    }
+    groupsHTML += `<div class="cmd-table">`;
+    g.commands.forEach((cmd, ci) => {
+      // args display
+      const argTags = cmd.args.length
+        ? cmd.args.map(a => `<span class="arg-tag${a.opt?' arg-optional':''}">${a.n}${a.opt?' ?':''}</span>`).join('')
+        : `<span class="arg-none">none</span>`;
+
+      // detail args
+      const detailArgs = cmd.args.length
+        ? cmd.args.map(a => `<span class="detail-arg${a.opt?' optional':''}">${a.n}${a.opt?' <span style="opacity:.5;font-size:10px">optional</span>':''}</span>`).join('')
+        : '<span style="color:var(--muted);font-size:12px;font-family:\'JetBrains Mono\',monospace">—</span>';
+
+      const uid = `${t.id}-${ci}-${g.label||'main'}`.replace(/\s+/g,'-');
+
+      groupsHTML += `
+        <div class="cmd-row" id="row-${uid}" onclick="toggle('${uid}')">
+          <div class="cmd-name">${cmd.cmd}</div>
+          <div class="cmd-purpose">${cmd.purpose}</div>
+          <div class="cmd-args">${argTags}</div>
+        </div>
+        <div class="cmd-detail" id="detail-${uid}">
+          <div class="detail-inner">
+            <div class="detail-block">
+              <div class="detail-label">Command</div>
+              <div class="detail-val" style="font-family:'JetBrains Mono',monospace;color:var(--tc)">${cmd.cmd}</div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-label">Arguments</div>
+              <div class="detail-val">${detailArgs}</div>
+            </div>
+            <div class="detail-block" style="flex:2;min-width:260px">
+              <div class="detail-label">Purpose</div>
+              <div class="detail-val">${cmd.purpose}</div>
+            </div>
+          </div>
+        </div>`;
+    });
+    groupsHTML += `</div>`;
+  });
+
+  sec.innerHTML = `
+    <div class="tier-head">
+      <div class="tier-icon">${t.icon}</div>
+      <div class="tier-meta">
+        <div class="tier-name">${t.name}</div>
+        <div class="tier-access">${t.access}</div>
+      </div>
+      <span class="tier-count">${totalCmds} command${totalCmds!==1?'s':''}</span>
+      <span class="tier-badge">${t.badge}</span>
+    </div>
+    ${groupsHTML}
+    <div class="tier-foot"></div>`;
+
+  tiersEl.appendChild(sec);
+});
+
+// WIP
+const wipEl = document.getElementById('wip-grid');
+WIP.forEach(w => {
+  wipEl.innerHTML += `
+    <div class="wip-card">
+      <div class="wip-tag">Planned</div>
+      <div class="wip-title">${w.title}</div>
+      <div class="wip-desc">${w.desc}</div>
+    </div>`;
+});
+
+// Toggle logic
+function toggle(uid) {
+  const row    = document.getElementById('row-'+uid);
+  const detail = document.getElementById('detail-'+uid);
+  const wasOn  = row.classList.contains('on');
+
+  // Close siblings in same tier
+  const tier = row.closest('section');
+  tier.querySelectorAll('.cmd-row.on').forEach(r => r.classList.remove('on'));
+
+  if (!wasOn) {
+    row.classList.add('on');
+    row.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E.R.I.S. — Fleet Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep:     #04080f;
+    --bg-panel:    #080e1a;
+    --bg-card:     #0b1422;
+    --bg-hover:    #0f1d30;
+    --cyan:        #00d4ff;
+    --cyan-dim:    #0088aa;
+    --cyan-glow:   rgba(0,212,255,0.15);
+    --amber:       #ffb700;
+    --amber-dim:   #996e00;
+    --red:         #ff3d3d;
+    --green:       #00ff88;
+    --green-dim:   #00994d;
+    --muted:       #2a3a50;
+    --text-bright: #e8f4ff;
+    --text-mid:    #7a9ab5;
+    --text-dim:    #3a5060;
+    --combat:      #ff6b35;
+    --carrier:     #00d4ff;
+    --picket:      #a855f7;
+    --balanced:    #00ff88;
+    --border:      rgba(0,212,255,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-bright);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(180deg, rgba(0,212,255,0.05) 0%, transparent 100%);
+    position: relative;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--cyan);
+    text-shadow: 0 0 20px var(--cyan), 0 0 40px rgba(0,212,255,0.3);
+    letter-spacing: 4px;
+  }
+
+  .logo-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mid);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  .header-status {
+    margin-left: auto;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+  }
+
+  .status-item { text-align: right; }
+
+  .status-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .status-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--cyan);
+  }
+
+  .status-value.warning { color: var(--amber); }
+  .status-value.danger  { color: var(--red); text-shadow: 0 0 10px var(--red); }
+
+  main {
+    display: grid;
+    grid-template-columns: 340px 1fr 300px;
+    gap: 0;
+    height: calc(100vh - 90px);
+  }
+
+  .panel-left {
+    border-right: 1px solid var(--border);
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel-center {
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  .panel-right {
+    border-left: 1px solid var(--border);
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--cyan-dim);
+    text-transform: uppercase;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+    flex-shrink: 0;
+  }
+
+  /* ── FORM FIELDS ── */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-mid);
+    text-transform: uppercase;
+  }
+
+  input, select {
+    background: var(--bg-card);
+    border: 1px solid var(--muted);
+    color: var(--text-bright);
+    padding: 10px 14px;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 14px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--cyan-dim);
+    box-shadow: 0 0 0 1px var(--cyan-dim), inset 0 0 10px rgba(0,212,255,0.05);
+  }
+
+  select option { background: var(--bg-card); }
+
+  /* ── TIER SELECTOR ── */
+  .tier-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .tier-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--muted);
+    color: var(--text-mid);
+    padding: 12px 8px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-align: center;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .tier-btn:hover { border-color: var(--cyan-dim); color: var(--text-bright); }
+
+  .tier-btn.active {
+    background: rgba(0,212,255,0.1);
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 10px rgba(0,212,255,0.2);
+  }
+
+  .tier-btn .tier-label {
+    font-size: 8px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  .tier-btn.active .tier-label { color: var(--cyan-dim); }
+
+  /* ── EMS INPUT ── */
+  .ems-input-wrap { position: relative; }
+
+  .ems-input-wrap input {
+    padding-right: 60px;
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    color: var(--cyan);
+  }
+
+  .ems-unit {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  /* ── RATIO BARS ── */
+  .ratio-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ratio-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .ratio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .ratio-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ratio-name:hover { opacity: 0.8; }
+
+  .ratio-toggle-icon {
+    font-size: 9px;
+    color: var(--text-dim);
+    transition: transform 0.2s, color 0.2s;
+    display: inline-block;
+  }
+
+  .ratio-row.expanded .ratio-toggle-icon {
+    transform: rotate(90deg);
+    color: currentColor;
+    opacity: 0.7;
+  }
+
+  .ratio-pct {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .ratio-bar-track {
+    height: 6px;
+    background: var(--muted);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .ratio-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ratio-combat   { color: var(--combat);  }
+  .ratio-carrier  { color: var(--carrier); }
+  .ratio-picket   { color: var(--picket);  }
+  .ratio-balanced { color: var(--balanced);}
+
+  .fill-combat   { background: var(--combat);  box-shadow: 0 0 6px var(--combat);  }
+  .fill-carrier  { background: var(--carrier); box-shadow: 0 0 6px var(--carrier); }
+  .fill-picket   { background: var(--picket);  box-shadow: 0 0 6px var(--picket);  }
+  .fill-balanced { background: var(--balanced);box-shadow: 0 0 6px var(--balanced);}
+
+  /* ── MATCHUP PANEL ── */
+  .ratio-matchup {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  .ratio-row.expanded .ratio-matchup {
+    max-height: 200px;
+    opacity: 1;
+  }
+
+  .matchup-card {
+    margin-top: 6px;
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .matchup-line {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+    display: flex;
+    gap: 6px;
+  }
+
+  .matchup-line .ml-label {
+    flex-shrink: 0;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 1px 5px;
+    border-radius: 1px;
+    font-weight: 600;
+  }
+
+  .ml-strong { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
+  .ml-weak   { background: rgba(255,61,61,0.1);  color: var(--red);   border: 1px solid rgba(255,61,61,0.3);  }
+  .ml-tactic { background: rgba(0,212,255,0.07); color: var(--cyan-dim); border: 1px solid var(--border); font-style: italic; }
+
+  .matchup-line .ml-text { color: var(--text-mid); }
+
+  /* ── BATTLE OPTIONS ── */
+  .battle-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .battle-option {
+    padding: 12px 16px;
+    border: 1px solid var(--muted);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .battle-option.unlocked { border-color: currentColor; background: rgba(0,0,0,0.3); }
+  .battle-option.locked   { opacity: 0.3; filter: grayscale(1); }
+
+  .battle-option.unlocked::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    background: currentColor;
+  }
+
+  .battle-option-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 6px currentColor;
+    flex-shrink: 0;
+  }
+
+  .battle-option-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+  }
+
+  .battle-option-desc {
+    font-size: 10px;
+    color: var(--text-mid);
+    font-family: 'Share Tech Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .battle-option-status {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .battle-option.unlocked .battle-option-status { color: var(--green); }
+  .battle-option.locked   .battle-option-status { color: var(--text-dim); }
+
+  .opt-combat   { color: var(--combat);  }
+  .opt-carrier  { color: var(--carrier); }
+  .opt-picket   { color: var(--picket);  }
+  .opt-balanced { color: var(--balanced);}
+
+  /* ── SHIP LIST ── */
+  .ship-grid-header {
+    display: grid;
+    grid-template-columns: 1fr 70px 70px 80px 90px;
+    gap: 8px;
+    padding: 8px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .ship-card {
+    display: grid;
+    grid-template-columns: 1fr 70px 70px 80px 90px;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .ship-card:hover:not(.locked-ship) {
+    background: var(--bg-hover);
+    border-color: var(--border);
+  }
+
+  .ship-card.locked-ship { opacity: 0.3; cursor: not-allowed; }
+  .ship-card.in-fleet { background: rgba(0,212,255,0.04); border-color: rgba(0,212,255,0.2); }
+
+  .ship-name { font-weight: 600; font-size: 13px; color: var(--text-bright); }
+
+  .ship-tier-badge {
+    position: absolute;
+    left: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .tier-1-bar { background: var(--green); }
+  .tier-2-bar { background: var(--amber); }
+  .tier-3-bar { background: var(--red);   }
+
+  .ship-ems {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  .ship-type-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+    display: inline-block;
+  }
+
+  .ship-qty-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .qty-btn {
+    width: 24px;
+    height: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--muted);
+    color: var(--text-bright);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .qty-btn:hover { background: rgba(0,212,255,0.1); border-color: var(--cyan-dim); }
+
+  .qty-display {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cyan);
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .ship-total-ems {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text-mid);
+    text-align: right;
+  }
+
+  /* ── FLEET MANIFEST ── */
+  .fleet-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .fleet-item {
+    background: var(--bg-card);
+    border-left: 2px solid var(--cyan-dim);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    overflow: hidden;
+  }
+
+  .fleet-item:hover { background: var(--bg-hover); }
+
+  .fleet-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+  }
+
+  .fleet-item-name { color: var(--text-bright); font-weight: 600; }
+
+  .fleet-item-qty {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text-mid);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .fleet-item-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .fleet-item-ems {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    color: var(--cyan);
+  }
+
+  .fleet-chevron {
+    font-size: 9px;
+    color: var(--text-dim);
+    transition: transform 0.2s, color 0.2s;
+    flex-shrink: 0;
+    width: 10px;
+    text-align: center;
+  }
+
+  .fleet-item.expanded .fleet-chevron {
+    transform: rotate(90deg);
+    color: var(--cyan-dim);
+  }
+
+  /* ── SHIP NAME INPUTS ── */
+  .fleet-item-names {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .fleet-item.expanded .fleet-item-names {
+    max-height: 400px;
+  }
+
+  .fleet-names-inner {
+    padding: 0 10px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border-top: 1px solid rgba(0,212,255,0.08);
+    margin-top: 0;
+    padding-top: 8px;
+  }
+
+  .ship-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ship-name-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    min-width: 42px;
+    flex-shrink: 0;
+  }
+
+  .ship-name-input {
+    flex: 1;
+    padding: 5px 8px;
+    font-size: 11px;
+    background: var(--bg-deep);
+    border: 1px solid var(--muted);
+    border-radius: 2px;
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+    width: auto;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .ship-name-input:focus {
+    border-color: var(--cyan-dim);
+    box-shadow: 0 0 0 1px rgba(0,136,170,0.3);
+  }
+
+  .ship-name-input::placeholder { color: var(--text-dim); }
+
+  .names-hint {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .empty-fleet {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 20px;
+    letter-spacing: 2px;
+  }
+
+  /* ── EMS GAUGE ── */
+  .ems-gauge {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 2px;
+  }
+
+  .ems-gauge-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .ems-used {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--cyan);
+  }
+
+  .ems-total {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    color: var(--text-dim);
+  }
+
+  .ems-bar-track {
+    height: 8px;
+    background: var(--muted);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .ems-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    border-radius: 4px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 8px var(--cyan);
+  }
+
+  .ems-bar-fill.warning { background: linear-gradient(90deg, var(--cyan), var(--amber)); box-shadow: 0 0 8px var(--amber); }
+  .ems-bar-fill.danger  { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+  .ems-remaining {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mid);
+    margin-top: 6px;
+    text-align: right;
+    letter-spacing: 1px;
+  }
+
+  /* ── WARNING BANNER ── */
+  .warning-banner {
+    background: rgba(255,183,0,0.08);
+    border: 1px solid var(--amber-dim);
+    border-left: 3px solid var(--amber);
+    padding: 10px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 1px;
+    display: none;
+  }
+
+  .warning-banner.visible { display: block; }
+
+  /* ── OUTPUT BLOCK ── */
+  .output-section {
+    padding-top: 4px;
+  }
+
+  .generate-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0,212,255,0.07);
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    cursor: pointer;
+    text-transform: uppercase;
+    border-radius: 2px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .generate-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+
+  .generate-btn:hover::before { transform: translateX(100%); }
+  .generate-btn:hover { background: rgba(0,212,255,0.13); box-shadow: 0 0 12px rgba(0,212,255,0.2); }
+
+  .output-block-wrap {
+    display: none;
+    margin-top: 10px;
+    position: relative;
+  }
+
+  .output-block-wrap.visible { display: block; }
+
+  .output-paste-hint {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .output-paste-hint::before {
+    content: '▶';
+    color: var(--cyan-dim);
+    font-size: 8px;
+  }
+
+  .output-paste-channel {
+    color: var(--cyan-dim);
+    font-style: italic;
+  }
+
+  .output-textarea {
+    width: 100%;
+    height: 220px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(0,255,136,0.15);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    line-height: 1.7;
+    padding: 12px;
+    border-radius: 2px;
+    resize: vertical;
+    outline: none;
+    letter-spacing: 0.5px;
+  }
+
+  .output-textarea:focus {
+    border-color: rgba(0,255,136,0.3);
+  }
+
+  .copy-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 9px;
+    background: rgba(0,255,136,0.06);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .copy-btn:hover { background: rgba(0,255,136,0.12); }
+  .copy-btn.copied { background: rgba(0,255,136,0.18); border-color: var(--green); box-shadow: 0 0 8px rgba(0,255,136,0.2); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cyan-dim); }
+
+  /* ── MISC ── */
+  .divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  .attr-bars { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+  .attr-row  { display: flex; align-items: center; gap: 6px; }
+  .attr-label { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--text-dim); width: 24px; flex-shrink: 0; }
+  .attr-track { flex: 1; height: 3px; background: var(--muted); border-radius: 2px; overflow: hidden; }
+  .attr-fill  { height: 100%; background: var(--cyan); border-radius: 2px; opacity: 0.6; }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.7; }
+  }
+
+  .battle-option.unlocked .battle-option-dot { animation: pulse-glow 2s ease-in-out infinite; }
+
+  .no-ships {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 40px 20px;
+    letter-spacing: 2px;
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">E.R.I.S.</div>
+    <div class="logo-sub">ENGAGEMENT RESOURCE &amp; INTELLIGENCE SYSTEM</div>
+  </div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-left:30px;">
+    FLEET BUILDER // SPACE FORCES // v0.2
+  </div>
+  <div class="header-status">
+    <div class="status-item">
+      <div class="status-label">EMS Available</div>
+      <div class="status-value" id="hdr-ems">—</div>
+    </div>
+    <div class="status-item">
+      <div class="status-label">EMS Spent</div>
+      <div class="status-value" id="hdr-spent">0</div>
+    </div>
+    <div class="status-item">
+      <div class="status-label">Fleet Type</div>
+      <div class="status-value" id="hdr-type" style="font-size:13px;letter-spacing:1px;">—</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="panel-left">
+
+    <div>
+      <div class="section-title">Commander Identity</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+
+        <div class="field-group">
+          <label>Submission ID</label>
+          <input type="text" id="submission-id" placeholder="e.g. GZ2SFF" oninput="updateDisplay()" style="text-transform:uppercase;">
+        </div>
+        <div class="field-group">
+          <label>Character Name</label>
+          <input type="text" id="char-name" placeholder="Enter name..." oninput="updateDisplay()">
+        </div>
+        <div class="field-group">
+          <label>Character Title</label>
+          <input type="text" id="char-title" placeholder="Admiral, Commander..." oninput="updateDisplay()">
+        </div>
+        <div class="field-group">
+          <label>Fleet Name</label>
+          <input type="text" id="fleet-name" placeholder="e.g. The Storm's Fury" oninput="updateDisplay()">
+        </div>
+        <div class="field-group">
+          <label>Clearance Tier</label>
+          <div class="tier-selector">
+            <button class="tier-btn active" onclick="setTier(1)" id="tier-btn-1">
+              TIER I
+              <div class="tier-label">RECRUIT</div>
+            </button>
+            <button class="tier-btn" onclick="setTier(2)" id="tier-btn-2">
+              TIER II
+              <div class="tier-label">OFFICER</div>
+            </button>
+            <button class="tier-btn" onclick="setTier(3)" id="tier-btn-3">
+              TIER III
+              <div class="tier-label">COMMAND</div>
+            </button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Available EMS</label>
+          <div class="ems-input-wrap">
+            <input type="number" id="ems-pool" placeholder="300" min="0" max="99999" oninput="updateDisplay()">
+            <span class="ems-unit">EMS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warning-banner" id="over-budget">
+      ⚠ EMS EXCEEDED — Remove ships to continue
+    </div>
+
+    <!-- FLEET COMPOSITION RATIOS with matchup expand -->
+    <div>
+      <div class="section-title">Fleet Composition Ratios</div>
+      <div class="ratio-container">
+
+        <!-- COMBAT -->
+        <div class="ratio-row" id="ratio-row-combat">
+          <div class="ratio-header">
+            <span class="ratio-name ratio-combat" onclick="toggleRatioMatchup('combat')">
+              <span class="ratio-toggle-icon">▶</span> Combat
+            </span>
+            <span class="ratio-pct ratio-combat" id="pct-combat">0%</span>
+          </div>
+          <div class="ratio-bar-track">
+            <div class="ratio-bar-fill fill-combat" id="bar-combat" style="width:0%"></div>
+          </div>
+          <div class="ratio-matchup">
+            <div class="matchup-card">
+              <div class="matchup-line">
+                <span class="ml-label ml-strong">STRONG</span>
+                <span class="ml-text">vs Carrier — firepower overwhelms launch decks before fighters deploy</span>
+              </div>
+              <div class="matchup-line">
+                <span class="ml-label ml-weak">WEAK</span>
+                <span class="ml-text">vs Picket — fast attack craft exploit fire arc gaps and disable key systems</span>
+              </div>
+              <div class="matchup-line">
+                <span class="ml-label ml-tactic">TACTIC</span>
+                <span class="ml-text">Optimal in decisive engagements where sustained firepower determines outcome</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARRIER -->
+        <div class="ratio-row" id="ratio-row-carrier">
+          <div class="ratio-header">
+            <span class="ratio-name ratio-carrier" onclick="toggleRatioMatchup('carrier')">
+              <span class="ratio-toggle-icon">▶</span> Carrier
+            </span>
+            <span class="ratio-pct ratio-carrier" id="pct-carrier">0%</span>
+          </div>
+          <div class="ratio-bar-track">
+            <div class="ratio-bar-fill fill-carrier" id="bar-carrier" style="width:0%"></div>
+          </div>
+          <div class="ratio-matchup">
+            <div class="matchup-card">
+              <div class="matchup-line">
+                <span class="ml-label ml-strong">STRONG</span>
+                <span class="ml-text">vs Balanced — fighter superiority degrades every role in a mixed doctrine fleet</span>
+              </div>
+              <div class="matchup-line">
+                <span class="ml-label ml-weak">WEAK</span>
+                <span class="ml-text">vs Combat — direct fire suppresses launch operations before deployment completes</span>
+              </div>
+              <div class="matchup-line">
+                <span class="ml-label ml-tactic">TACTIC</span>
+                <span class="ml-text">Excels in prolonged engagements; requires time to reach full combat effectiveness</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PICKET -->
+        <div class="ratio-row" id="ratio-row-picket">
+          <div class="ratio-header">
+            <span class="ratio-name ratio-picket" onclick="toggleRatioMatchup('picket')">
+              <span class="ratio-toggle-icon">▶</span> Picket
+            </span>
+            <span class="ratio-pct ratio-picket" id="pct-picket">0%</span>
+          </div>
+          <div class="ratio-bar-track">
+            <div class="ratio-bar-fill fill-picket" id="bar-picket" style="width:0%"></div>
+          </div>
+          <div class="ratio-matchup">
+            <div class="matchup-card">
+              <div class="matchup-line">
+                <span class="ml-label ml-strong">STRONG</span>
+                <span class="ml-text">vs Combat — speed denial and flanking maneuvers neutralize heavy weapon arcs</span>
+              </div>
+              <div class="matchup-line">
+                <span class="ml-label ml-weak">WEAK</span>
+                <span class="ml-text">vs Balanced — layered multi-range doctrine counters hit-and-run at every vector</span>
+              </div>
+              <div class="matchup-line">
+                <span class="ml-label ml-tactic">TACTIC</span>
+                <span class="ml-text">Dominates interdiction and harassment roles; struggles in sustained slugfests</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BALANCED -->
+        <div class="ratio-row" id="ratio-row-balanced">
+          <div class="ratio-header">
+            <span class="ratio-name ratio-balanced" onclick="toggleRatioMatchup('balanced')">
+              <span class="ratio-toggle-icon">▶</span> Balanced
+            </span>
+            <span class="ratio-pct ratio-balanced" id="pct-balanced">0%</span>
+          </div>
+          <div class="ratio-bar-track">
+            <div class="ratio-bar-fill fill-balanced" id="bar-balanced" style="width:0%"></div>
+          </div>
+          <div class="ratio-matchup">
+            <div class="matchup-card">
+              <div class="matchup-line">
+                <span class="ml-label ml-strong">STRONG</span>
+                <span class="ml-text">vs Picket — adaptive coverage closes the range gaps fast movers depend on</span>
+              </div>
+              <div class="matchup-line">
+                <span class="ml-label ml-weak">WEAK</span>
+                <span class="ml-text">vs Carrier — fighter attrition across all roles degrades fleet effectiveness over time</span>
+              </div>
+              <div class="matchup-line">
+                <span class="ml-label ml-tactic">TACTIC</span>
+                <span class="ml-text">Reliable in most engagement types. Rarely optimal — never catastrophic</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BATTLE OPTIONS -->
+    <div>
+      <div class="section-title">Battle Options Unlocked</div>
+      <div class="battle-options">
+        <div class="battle-option opt-combat locked" id="opt-combat">
+          <div class="battle-option-dot"></div>
+          <div>
+            <div class="battle-option-name">Combat</div>
+            <div class="battle-option-desc">Firepower + Hull dominant</div>
+          </div>
+          <div class="battle-option-status" id="opt-combat-status">LOCKED</div>
+        </div>
+        <div class="battle-option opt-carrier locked" id="opt-carrier">
+          <div class="battle-option-dot"></div>
+          <div>
+            <div class="battle-option-name">Carrier</div>
+            <div class="battle-option-desc">Capacity dominant</div>
+          </div>
+          <div class="battle-option-status" id="opt-carrier-status">LOCKED</div>
+        </div>
+        <div class="battle-option opt-picket locked" id="opt-picket">
+          <div class="battle-option-dot"></div>
+          <div>
+            <div class="battle-option-name">Picket</div>
+            <div class="battle-option-desc">Speed + Agility dominant</div>
+          </div>
+          <div class="battle-option-status" id="opt-picket-status">LOCKED</div>
+        </div>
+        <div class="battle-option opt-balanced locked" id="opt-balanced">
+          <div class="battle-option-dot"></div>
+          <div>
+            <div class="battle-option-name">Balanced</div>
+            <div class="battle-option-desc">Even spread required</div>
+          </div>
+          <div class="battle-option-status" id="opt-balanced-status">LOCKED</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CENTER PANEL: Ship List ── -->
+  <div class="panel-center">
+    <div class="section-title">Available Ships — Select to Add to Fleet</div>
+
+    <div class="ship-grid-header">
+      <div>Ship Class</div>
+      <div>EMS Cost</div>
+      <div>Type</div>
+      <div>Quantity</div>
+      <div style="text-align:right">Fleet EMS</div>
+    </div>
+
+    <div id="ship-list"></div>
+  </div>
+
+  <!-- ── RIGHT PANEL: EMS Gauge + Manifest + Output ── -->
+  <div class="panel-right">
+
+    <div>
+      <div class="section-title">EMS Allocation</div>
+      <div class="ems-gauge">
+        <div class="ems-gauge-header">
+          <div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:4px;">SPENT</div>
+            <span class="ems-used" id="gauge-spent">0</span>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:4px;">AVAILABLE</div>
+            <span class="ems-total" id="gauge-total">—</span>
+          </div>
+        </div>
+        <div class="ems-bar-track">
+          <div class="ems-bar-fill" id="ems-bar" style="width:0%"></div>
+        </div>
+        <div class="ems-remaining" id="ems-remaining">Set your EMS pool to begin</div>
+      </div>
+    </div>
+
+    <div style="flex:1">
+      <div class="section-title">
+        Fleet Manifest
+        <span style="font-size:8px;color:var(--text-dim);margin-left:4px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;font-style:italic;">click to name hulls</span>
+      </div>
+      <div class="fleet-summary" id="fleet-manifest">
+        <div class="empty-fleet">NO SHIPS SELECTED<br><br>ADD SHIPS FROM<br>THE CENTER PANEL</div>
+      </div>
+    </div>
+
+    <!-- GENERATE BLOCK -->
+    <div class="output-section">
+      <div class="section-title">Commander Block</div>
+      <button class="generate-btn" onclick="generateBlock()">⟨ Generate Submission Block ⟩</button>
+      <div class="output-block-wrap" id="output-block-wrap">
+        <div class="output-paste-hint">
+          Paste into <span class="output-paste-channel">#commander-submissions</span>
+        </div>
+        <textarea class="output-textarea" id="output-textarea" readonly></textarea>
+        <button class="copy-btn" id="copy-btn" onclick="copyBlock()">⧉ Copy to Clipboard</button>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ── SHIP DATA ──────────────────────────────────────────────────────────────
+const SHIPS = [
+  { id:'sf',   name:'Starfighter Squadron',      ems:10,  tier:1, type:'picket',   spd:10, fpw:3,  hul:1,  shd:1,  cap:0  },
+  { id:'esf',  name:'Elite Starfighter Squad',   ems:20,  tier:1, type:'picket',   spd:10, fpw:6,  hul:3,  shd:3,  cap:0  },
+  { id:'lsf',  name:'Legendary Starfighter Sq.', ems:30,  tier:2, type:'picket',   spd:10, fpw:9,  hul:5,  shd:5,  cap:0  },
+  { id:'cv',   name:'Corvette',                  ems:20,  tier:1, type:'picket',   spd:7,  fpw:3,  hul:2,  shd:3,  cap:0  },
+  { id:'fr',   name:'Frigate',                   ems:30,  tier:1, type:'balanced', spd:6,  fpw:4,  hul:4,  shd:4,  cap:0  },
+  { id:'lc',   name:'Light Cruiser',             ems:50,  tier:1, type:'balanced', spd:5,  fpw:5,  hul:5,  shd:5,  cap:1  },
+  { id:'dd',   name:'Destroyer',                 ems:50,  tier:1, type:'combat',   spd:5,  fpw:6,  hul:5,  shd:4,  cap:0  },
+  { id:'ep',   name:'Escort Picket',             ems:25,  tier:1, type:'picket',   spd:8,  fpw:4,  hul:3,  shd:4,  cap:0  },
+  { id:'ls',   name:'Light Support',             ems:30,  tier:1, type:'carrier',  spd:6,  fpw:2,  hul:3,  shd:3,  cap:4  },
+  { id:'hd',   name:'Heavy Destroyer',           ems:60,  tier:2, type:'combat',   spd:5,  fpw:7,  hul:6,  shd:5,  cap:0  },
+  { id:'cr',   name:'Cruiser',                   ems:60,  tier:2, type:'balanced', spd:4,  fpw:6,  hul:6,  shd:6,  cap:1  },
+  { id:'ec',   name:'Escort Carrier',            ems:70,  tier:2, type:'carrier',  spd:4,  fpw:3,  hul:5,  shd:5,  cap:8  },
+  { id:'hc',   name:'Heavy Cruiser',             ems:70,  tier:2, type:'combat',   spd:4,  fpw:7,  hul:7,  shd:6,  cap:2  },
+  { id:'bc',   name:'Battlecruiser',             ems:100, tier:2, type:'combat',   spd:3,  fpw:8,  hul:7,  shd:7,  cap:2  },
+  { id:'bs',   name:'Battleship',                ems:150, tier:2, type:'combat',   spd:2,  fpw:9,  hul:9,  shd:8,  cap:1  },
+  { id:'fc',   name:'Fleet Carrier',             ems:150, tier:2, type:'carrier',  spd:3,  fpw:4,  hul:7,  shd:7,  cap:10 },
+  { id:'dr',   name:'Dreadnought',               ems:200, tier:3, type:'combat',   spd:2,  fpw:9,  hul:9,  shd:8,  cap:3  },
+  { id:'hdr',  name:'Heavy Dreadnought',         ems:500, tier:3, type:'combat',   spd:1,  fpw:10, hul:10, shd:9,  cap:4  },
+  { id:'sdr',  name:'Super Dreadnought',         ems:750, tier:3, type:'choice',   spd:1,  fpw:10, hul:10, shd:9,  cap:8  },
+];
+
+const TYPE_COLORS = {
+  combat:   'var(--combat)',
+  carrier:  'var(--carrier)',
+  picket:   'var(--picket)',
+  balanced: 'var(--balanced)',
+  choice:   'var(--amber)',
+};
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let state = {
+  tier:         1,
+  emsPool:      0,
+  fleet:        {},   // id → qty
+  shipNames:    {},   // id → ['Hull 1 name', 'Hull 2 name', ...]
+  expandedItems:new Set(),
+  expandedRatios:new Set(),
+};
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+function init() {
+  renderShipList();
+  updateDisplay();
+}
+
+// ── UTILITY ───────────────────────────────────────────────────────────────
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── TIER ──────────────────────────────────────────────────────────────────
+function setTier(t) {
+  state.tier = t;
+  SHIPS.forEach(s => {
+    if (s.tier > t && state.fleet[s.id]) {
+      delete state.fleet[s.id];
+      delete state.shipNames[s.id];
+      state.expandedItems.delete(s.id);
+    }
+  });
+  [1,2,3].forEach(i => {
+    document.getElementById(`tier-btn-${i}`).classList.toggle('active', i === t);
+  });
+  renderShipList();
+  updateDisplay();
+}
+
+// ── RATIO MATCHUP TOGGLE ──────────────────────────────────────────────────
+function toggleRatioMatchup(type) {
+  const row = document.getElementById(`ratio-row-${type}`);
+  if (!row) return;
+  if (state.expandedRatios.has(type)) {
+    state.expandedRatios.delete(type);
+    row.classList.remove('expanded');
+  } else {
+    state.expandedRatios.add(type);
+    row.classList.add('expanded');
+  }
+}
+
+// ── SHIP LIST RENDER ──────────────────────────────────────────────────────
+function renderShipList() {
+  const container = document.getElementById('ship-list');
+  container.innerHTML = '';
+
+  SHIPS.forEach(ship => {
+    const locked = ship.tier > state.tier;
+    const qty    = state.fleet[ship.id] || 0;
+    const total  = ship.ems * qty;
+
+    const card = document.createElement('div');
+    card.className = `ship-card ${locked ? 'locked-ship' : ''} ${qty > 0 ? 'in-fleet' : ''}`;
+    card.id = `ship-card-${ship.id}`;
+
+    const tierClass = `tier-${ship.tier}-bar`;
+    const typeColor = TYPE_COLORS[ship.type] || 'var(--text-mid)';
+    const typeName  = ship.type === 'choice' ? 'CMDR CHOICE' : ship.type.toUpperCase();
+
+    card.innerHTML = `
+      <div class="ship-tier-badge ${tierClass}"></div>
+      <div>
+        <div class="ship-name">${ship.name}</div>
+        ${locked ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--red);letter-spacing:1px;margin-top:2px;">TIER ${ship.tier} REQUIRED</div>` : ''}
+      </div>
+      <div class="ship-ems">${ship.ems}</div>
+      <div>
+        <span class="ship-type-badge" style="color:${typeColor};border-color:${typeColor};">${typeName}</span>
+      </div>
+      <div class="ship-qty-control" onclick="event.stopPropagation()">
+        ${locked ? '' : `
+          <button class="qty-btn" onclick="changeQty('${ship.id}',-1)">−</button>
+          <span class="qty-display" id="qty-${ship.id}">${qty}</span>
+          <button class="qty-btn" onclick="changeQty('${ship.id}',1)">+</button>
+        `}
+      </div>
+      <div class="ship-total-ems">${qty > 0 ? total + ' EMS' : '—'}</div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// ── QTY CONTROL ──────────────────────────────────────────────────────────
+function changeQty(id, delta) {
+  const current = state.fleet[id] || 0;
+  const next    = Math.max(0, current + delta);
+
+  if (next === 0) {
+    delete state.fleet[id];
+    delete state.shipNames[id];
+    state.expandedItems.delete(id);
+  } else {
+    state.fleet[id] = next;
+    // Resize names array to match new qty
+    if (!state.shipNames[id]) state.shipNames[id] = [];
+    while (state.shipNames[id].length < next) state.shipNames[id].push('');
+    state.shipNames[id].length = next;
+  }
+
+  const qtyEl = document.getElementById(`qty-${id}`);
+  if (qtyEl) qtyEl.textContent = next;
+
+  const card = document.getElementById(`ship-card-${id}`);
+  if (card) card.classList.toggle('in-fleet', next > 0);
+
+  updateDisplay();
+}
+
+// ── FLEET MANIFEST EXPAND ─────────────────────────────────────────────────
+function toggleManifestItem(id) {
+  if (state.expandedItems.has(id)) {
+    state.expandedItems.delete(id);
+  } else {
+    state.expandedItems.add(id);
+  }
+  renderManifest();
+}
+
+function setShipName(id, index, value) {
+  if (!state.shipNames[id]) state.shipNames[id] = [];
+  state.shipNames[id][index] = value;
+}
+
+// ── MANIFEST RENDER ───────────────────────────────────────────────────────
+function renderManifest() {
+  const container = document.getElementById('fleet-manifest');
+  const entries = SHIPS.filter(s => (state.fleet[s.id] || 0) > 0);
+
+  if (!entries.length) {
+    container.innerHTML = '<div class="empty-fleet">NO SHIPS SELECTED<br><br>ADD SHIPS FROM<br>THE CENTER PANEL</div>';
+    return;
+  }
+
+  container.innerHTML = entries.map(ship => {
+    const qty       = state.fleet[ship.id];
+    const total     = ship.ems * qty;
+    const typeColor = TYPE_COLORS[ship.type] || 'var(--text-mid)';
+    const expanded  = state.expandedItems.has(ship.id);
+
+    // Ensure names array is correct size
+    if (!state.shipNames[ship.id]) state.shipNames[ship.id] = [];
+    while (state.shipNames[ship.id].length < qty) state.shipNames[ship.id].push('');
+
+    const nameInputs = Array.from({length: qty}, (_, i) => `
+      <div class="ship-name-row">
+        <span class="ship-name-label">HULL ${i + 1}</span>
+        <input
+          class="ship-name-input"
+          type="text"
+          placeholder="Unnamed"
+          value="${escapeHtml(state.shipNames[ship.id][i] || '')}"
+          onchange="setShipName('${ship.id}', ${i}, this.value)"
+          onclick="event.stopPropagation()"
+        >
+      </div>
+    `).join('');
+
+    return `
+      <div class="fleet-item ${expanded ? 'expanded' : ''}"
+           style="border-left-color:${typeColor}"
+           onclick="toggleManifestItem('${ship.id}')">
+        <div class="fleet-item-header">
+          <div>
+            <div class="fleet-item-name">${ship.name}</div>
+            <div class="fleet-item-qty">×${qty} @ ${ship.ems} EMS each</div>
+          </div>
+          <div class="fleet-item-right">
+            <div class="fleet-item-ems">${total}</div>
+            <span class="fleet-chevron">▶</span>
+          </div>
+        </div>
+        <div class="fleet-item-names">
+          <div class="fleet-names-inner">
+            ${nameInputs}
+            <div class="names-hint">hull designations appear in the output block</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── COMPUTE RATIOS ────────────────────────────────────────────────────────
+function computeRatios() {
+  let totals = { combat:0, carrier:0, picket:0, balanced:0 };
+  let totalEms = 0;
+
+  SHIPS.forEach(ship => {
+    const qty = state.fleet[ship.id] || 0;
+    if (!qty) return;
+    const ems = ship.ems * qty;
+    totalEms += ems;
+    if (ship.type === 'choice') {
+      totals.combat  += ems * 0.5;
+      totals.carrier += ems * 0.5;
+    } else {
+      totals[ship.type] = (totals[ship.type] || 0) + ems;
+    }
+  });
+
+  if (totalEms === 0) return { combat:0, carrier:0, picket:0, balanced:0, totalEms:0 };
+
+  return {
+    combat:   Math.round((totals.combat   / totalEms) * 100),
+    carrier:  Math.round((totals.carrier  / totalEms) * 100),
+    picket:   Math.round((totals.picket   / totalEms) * 100),
+    balanced: Math.round((totals.balanced / totalEms) * 100),
+    totalEms,
+  };
+}
+
+// ── BATTLE OPTIONS LOGIC ──────────────────────────────────────────────────
+function computeBattleOptions(ratios) {
+  const types  = ['combat','carrier','picket','balanced'];
+  const sorted = types.slice().sort((a,b) => ratios[b] - ratios[a]);
+  const unlocked = [];
+  const top    = sorted[0];
+  const second = sorted[1];
+
+  if (ratios.totalEms === 0) return [];
+  if (ratios[top] >= 40) unlocked.push(top);
+  if (ratios[second] >= 25 && (ratios[top] - ratios[second]) <= 30) unlocked.push(second);
+  if (unlocked.includes('balanced') && ratios.balanced < 25) {
+    unlocked.splice(unlocked.indexOf('balanced'), 1);
+  }
+  return unlocked;
+}
+
+// ── FLEET EMS ────────────────────────────────────────────────────────────
+function computeSpent() {
+  return SHIPS.reduce((sum, ship) => sum + ship.ems * (state.fleet[ship.id] || 0), 0);
+}
+
+// ── GENERATE COMMANDER BLOCK ──────────────────────────────────────────────
+function generateBlock() {
+  const submissionId = document.getElementById('submission-id').value.trim().toUpperCase();
+  const name      = document.getElementById('char-name').value.trim() || 'UNKNOWN';
+  const title     = document.getElementById('char-title').value.trim();
+  const fleetName = document.getElementById('fleet-name').value.trim();
+  const tier      = state.tier;
+  const pool      = state.emsPool;
+  const spent     = computeSpent();
+  const ratios    = computeRatios();
+  const options   = computeBattleOptions(ratios);
+
+  const types = ['combat','carrier','picket','balanced'];
+  const dom = types.reduce((a,b) => ratios[a] >= ratios[b] ? a : b);
+  const fleetType = ratios.totalEms > 0 ? dom.toUpperCase() : 'UNASSIGNED';
+
+  const shipEntries = SHIPS.filter(s => (state.fleet[s.id] || 0) > 0);
+
+  const shipLines = shipEntries.map(s => {
+    const qty   = state.fleet[s.id];
+    const total = s.ems * qty;
+    const names = (state.shipNames[s.id] || []).map(n => n.trim()).filter(Boolean);
+    const nameStr = names.length ? ` [${names.join(', ')}]` : '';
+    return `  ${s.name} x${qty} @ ${s.ems} EMS = ${total} EMS${nameStr}`;
+  }).join('\n');
+
+  const ratioLines = [
+    `  COMBAT:   ${ratios.combat}%`,
+    `  CARRIER:  ${ratios.carrier}%`,
+    `  PICKET:   ${ratios.picket}%`,
+    `  BALANCED: ${ratios.balanced}%`,
+  ].join('\n');
+
+  const optStr = options.length
+    ? options.map(o => o.toUpperCase()).join(', ')
+    : 'NONE';
+
+  const lines = [
+    '=== ERIS COMMANDER BLOCK ===',
+    submissionId ? `SUBMISSION_ID: ${submissionId}` : null,
+    `NAME: ${name}`,
+    title ? `TITLE: ${title}` : null,
+    fleetName ? `FLEET_NAME: ${fleetName}` : null,
+    `TIER: ${tier}`,
+    `EMS_POOL: ${pool || 0}`,
+    `EMS_SPENT: ${spent}`,
+    `FLEET_TYPE: ${fleetType}`,
+    `BATTLE_OPTIONS: ${optStr}`,
+    'COMPOSITION:',
+    ratioLines,
+    'SHIPS:',
+    shipLines || '  (no ships selected)',
+    '=== END BLOCK ===',
+  ].filter(l => l !== null).join('\n');
+
+  document.getElementById('output-textarea').value = lines;
+  document.getElementById('output-block-wrap').classList.add('visible');
+
+  // Scroll to output
+  document.getElementById('output-block-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── COPY BLOCK ────────────────────────────────────────────────────────────
+function copyBlock() {
+  const ta  = document.getElementById('output-textarea');
+  const btn = document.getElementById('copy-btn');
+
+  navigator.clipboard.writeText(ta.value).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '⧉ Copy to Clipboard';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // Fallback for non-HTTPS
+    ta.select();
+    document.execCommand('copy');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '⧉ Copy to Clipboard';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ── MAIN UPDATE ──────────────────────────────────────────────────────────
+function updateDisplay() {
+  const pool  = parseInt(document.getElementById('ems-pool').value) || 0;
+  state.emsPool = pool;
+
+  const spent   = computeSpent();
+  const ratios  = computeRatios();
+  const options = computeBattleOptions(ratios);
+  const pct     = pool > 0 ? Math.min((spent / pool) * 100, 100) : 0;
+  const over    = spent > pool && pool > 0;
+
+  // Header
+  document.getElementById('hdr-ems').textContent   = pool || '—';
+  document.getElementById('hdr-spent').textContent = spent;
+  document.getElementById('hdr-ems').className     = `status-value ${over ? 'danger' : ''}`;
+
+  const types = ['combat','carrier','picket','balanced'];
+  const dom = types.reduce((a,b) => ratios[a] >= ratios[b] ? a : b);
+  document.getElementById('hdr-type').textContent  = ratios.totalEms > 0 ? dom.toUpperCase() : '—';
+  document.getElementById('hdr-type').style.color  = ratios.totalEms > 0 ? TYPE_COLORS[dom] : 'var(--text-dim)';
+
+  // Ratio bars
+  types.forEach(t => {
+    const val = ratios[t] || 0;
+    document.getElementById(`pct-${t}`).textContent = val + '%';
+    document.getElementById(`bar-${t}`).style.width = val + '%';
+  });
+
+  // Battle options
+  types.forEach(t => {
+    const el     = document.getElementById(`opt-${t}`);
+    const status = document.getElementById(`opt-${t}-status`);
+    const on     = options.includes(t);
+    el.classList.toggle('unlocked', on);
+    el.classList.toggle('locked',  !on);
+    status.textContent = on ? 'AVAILABLE' : 'LOCKED';
+  });
+
+  // EMS gauge
+  document.getElementById('gauge-spent').textContent = spent;
+  document.getElementById('gauge-total').textContent = pool || '—';
+  const bar = document.getElementById('ems-bar');
+  bar.style.width = pct + '%';
+  bar.className = `ems-bar-fill ${over ? 'danger' : pct > 75 ? 'warning' : ''}`;
+
+  const remaining = pool - spent;
+  if (pool === 0) {
+    document.getElementById('ems-remaining').textContent = 'Set your EMS pool to begin';
+    document.getElementById('ems-remaining').style.color = 'var(--text-mid)';
+  } else if (over) {
+    document.getElementById('ems-remaining').textContent = `⚠ ${Math.abs(remaining)} EMS over budget`;
+    document.getElementById('ems-remaining').style.color = 'var(--red)';
+  } else {
+    document.getElementById('ems-remaining').textContent = `${remaining} EMS remaining`;
+    document.getElementById('ems-remaining').style.color = 'var(--text-mid)';
+  }
+
+  document.getElementById('over-budget').classList.toggle('visible', over);
+
+  renderManifest();
+}
+
+init();
+</script>
+</body>
+</html>

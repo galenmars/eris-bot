@@ -1,0 +1,20 @@
+# Discord Bot Requirements
+# Compatible with Python 3.10+  ← bump this, we use str | None syntax
+
+# Discord.py
+discord.py>=2.3.0,<3.0.0
+
+# Timezone support
+pytz>=2023.3
+
+# Debugging and development tool
+jishaku>=2.5.0
+
+# Async HTTP (used by discord.py internally)
+aiohttp>=3.9.0
+
+# Environment variables  ← NEW, needed for .env loading in bot.py
+python-dotenv>=1.0.0
+
+# Colored console output
+colorama>=0.4.6
