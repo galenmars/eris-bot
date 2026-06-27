@@ -836,10 +836,38 @@ class CampaignCog(commands.Cog, name="Campaign"):
         factions = campaign_repo.get_campaign_factions(self.db, campaign['campaign_id'])
         enrolled = campaign_repo.get_enrolled_commanders(self.db, campaign['campaign_id'])
 
-        opposing_ems_total   = campaign.get('opposing_ems_total', 0)
-        opposing_ems_current = campaign.get('opposing_ems_current', 0)
-        ems_dealt         = opposing_ems_total - opposing_ems_current
-        cap_display       = str(campaign.get('max_commanders', 0)) if campaign.get('max_commanders') else 'No limit'
+        cap_display = str(campaign.get('max_commanders', 0)) if campaign.get('max_commanders') else 'No limit'
+
+        # EMS lives in two different column pairs depending on campaign_type:
+        #   Tug-of-War          -> side_a_ems_current / side_b_ems_current (vs. their _start)
+        #   Invasion / Defense  -> opposing_ems_current / opposing_ems_total (single pool)
+        # campaign_progress already branches on this — mirror it here so /campaign view
+        # doesn't read the wrong (frozen) columns for Tug-of-War campaigns.
+        campaign_type = (campaign.get('campaign_type') or '').lower()
+
+        if campaign_type == 'tug-of-war':
+            side_a_label_short = (campaign.get('side_a_factions') or 'Side A').split(',')[0]
+            side_b_label_short = (campaign.get('side_b_factions') or 'Side B').split(',')[0]
+            side_a_start = campaign.get('side_a_ems_start', 0)
+            side_b_start = campaign.get('side_b_ems_start', 0)
+            side_a_current = campaign.get('side_a_ems_current', side_a_start)
+            side_b_current = campaign.get('side_b_ems_current', side_b_start)
+            side_a_dealt = side_a_start - side_a_current
+            side_b_dealt = side_b_start - side_b_current
+            ems_line = (
+                f"**{side_a_label_short} EMS:** `{side_a_current}` / `{side_a_start}` remaining "
+                f"*(dealt: `{side_b_dealt}`)*\n"
+                f"**{side_b_label_short} EMS:** `{side_b_current}` / `{side_b_start}` remaining "
+                f"*(dealt: `{side_a_dealt}`)*"
+            )
+        else:
+            opposing_ems_total = campaign.get('opposing_ems_total', 0)
+            opposing_ems_current = campaign.get('opposing_ems_current', 0)
+            ems_dealt = opposing_ems_total - opposing_ems_current
+            ems_line = (
+                f"**Opposing EMS:** `{opposing_ems_current}` / `{opposing_ems_total}` remaining "
+                f"*(dealt: `{ems_dealt}`)*"
+            )
 
         embed = discord.Embed(
             title=f"📋 {campaign['campaign_name']}",
@@ -849,8 +877,7 @@ class CampaignCog(commands.Cog, name="Campaign"):
                 f"**Enrollment closes:** {_format_deadline(campaign.get('enrollment_deadline'))}\n"
                 f"**Max commanders:** {cap_display}\n"
                 f"**Commanders enrolled:** {len(enrolled)}\n\n"
-                f"**Opposing EMS:** `{opposing_ems_current}` / `{opposing_ems_total}` remaining "
-                f"*(dealt: `{ems_dealt}`)*"
+                f"{ems_line}"
             ),
             color=discord.Color.blue(),
         )
