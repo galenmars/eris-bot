@@ -63,9 +63,9 @@ log = logging.getLogger(__name__)
 # CONSTANTS
 # =============================================================================
 
-ROLL_TIMEOUT     = 300
-TACTIC_TIMEOUT   = 300
-TENACITY_TIMEOUT = 120
+ROLL_TIMEOUT     = 3600   # 1 hr — matches slower narrative pacing between exchanges
+TACTIC_TIMEOUT   = 1800   # 30 min is plenty for a single tactic pick
+TENACITY_TIMEOUT = 300    # 5 min — this is a quick reactive prompt, let's keep it short
 TENACITY_ROUNDS  = 2
 TENACITY_LP_COST = 5
 DICE_COMBAT      = '1d20'
