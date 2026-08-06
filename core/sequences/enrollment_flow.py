@@ -734,21 +734,24 @@ def _build_selection_embed(
         discord.Embed: The formatted selection embed.
     """
     RANK_EMOJI = {'Main': '⭐', 'Senior': '🎖️', 'Junior': '🔰'}
+    FORCE_EMOJI = {'Fleet': '🚀', 'Army': '🪖'}
 
     embed = discord.Embed(
-        title       = f"🎖️ Campaign Enrollment: {campaign_name}",
-        description = "Which commander do you want to enroll?",
-        color       = discord.Color.gold()
+        title=f"🎖️ Campaign Enrollment: {campaign_name}",
+        description="Which commander do you want to enroll?",
+        color=discord.Color.gold()
     )
 
     # Available commanders
     avail_lines = []
     for i, cmd in enumerate(available, start=1):
         emoji = RANK_EMOJI.get(cmd.get('rank', ''), '')
+        force = cmd.get('force_type', '')
+        force_emoji = FORCE_EMOJI.get(force, '')
         lp = f"{cmd.get('current_leadership_points', '?')}/{cmd.get('max_leadership_points', '?')}"
         avail_lines.append(
             f"{i}. {emoji} **{cmd['commander_name']}** "
-            f"({cmd.get('rank', '?')}, {lp} LP)"
+            f"({cmd.get('rank', '?')}, {force_emoji} {force}, {lp} LP)"
         )
 
     embed.add_field(
@@ -762,9 +765,11 @@ def _build_selection_embed(
         unavail_lines = []
         for cmd in unavailable:
             emoji = RANK_EMOJI.get(cmd.get('rank', ''), '')
+            force = cmd.get('force_type', '')
+            force_emoji = FORCE_EMOJI.get(force, '')
             unavail_lines.append(
                 f"{emoji} **{cmd['commander_name']}** "
-                f"({cmd.get('rank', '?')}) — deployed in \"{cmd.get('active_campaign_name', 'another campaign')}\""
+                f"({cmd.get('rank', '?')}, {force_emoji} {force}) — deployed in \"{cmd.get('active_campaign_name', 'another campaign')}\""
             )
 
         embed.add_field(

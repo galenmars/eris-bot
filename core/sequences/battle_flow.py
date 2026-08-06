@@ -550,8 +550,7 @@ async def _collect_tactical_choices(
         await _try_dm(
             player,
             f"✅ Force type auto-selected: **{fleet_type.replace('_', ' ').capitalize()}**\n\n"
-            f"🎯 Setup complete! Return to the battle channel.\n"
-            f"🎲 Roll for initiative! Use `/battle roll` in the battle channel."
+            f"🎯 Setup complete! Return to the battle channel."
         )
 
         await channel.send(f"✅ **{player.display_name}** has submitted their tactical choices.")
@@ -896,8 +895,14 @@ async def _complete_battle(
 
     # EMS table losses
     campaign = campaign_repo.get_campaign_by_id(db, campaign_id) if campaign_id else {}
-    p1_side_label = (campaign.get('side_a_factions') or 'Side A').replace(',', ', ')
-    p2_side_label = (campaign.get('side_b_factions') or 'Side B').replace(',', ', ')
+    _side_a = (campaign.get('side_a_factions') or 'Side A').replace(',', ', ')
+    _side_b = (campaign.get('side_b_factions') or 'Side B').replace(',', ', ')
+
+    # p1/p2 is just argument order — it says nothing about sides.
+    # Enrollment decides which faction a commander fights for, so read
+    # the label off each commander's own 'side' from the campaign enrollment.
+    p1_side_label = _side_a if p1_commander['side'] == 'a' else _side_b
+    p2_side_label = _side_a if p2_commander['side'] == 'a' else _side_b
 
     if result == 'p1':
         winner_name = p1_commander['commander_name']
@@ -1015,16 +1020,22 @@ async def _complete_battle(
                     b_lost = p1_total_ems_lost if p1_commander['side'] == 'b' else p2_total_ems_lost
                     a_before = a_current + a_lost
                     b_before = b_current + b_lost
-                    nudge_cap = (a_start + b_start) or max(a_start, b_start, 1)
+                    combined_cap = (a_start + b_start) or max(a_start, b_start, 1)
 
+                    # Each side crosses 20% relative to its OWN starting pool,
+                    # not the combined total — matches the progress/nudge
+                    # embed display fix. Asymmetric pools (e.g. 100 vs 150)
+                    # previously fired this at the wrong moment for whichever
+                    # side didn't happen to align with the shared cap's 20%.
                     for which, before, current, start in (
                             ('a', a_before, a_current, a_start),
                             ('b', b_before, b_current, b_start),
                     ):
-                        if nudge_cap > 0:
+                        own_threshold_cap = start if start > 0 else combined_cap
+                        if own_threshold_cap > 0:
                             just_crossed = (
-                                (before / nudge_cap) > 0.20
-                                and (current / nudge_cap) <= 0.20
+                                    (before / own_threshold_cap) > 0.20
+                                    and (current / own_threshold_cap) <= 0.20
                             )
                             if just_crossed:
                                 nudge_label = side_a_label if which == 'a' else side_b_label
@@ -1034,7 +1045,7 @@ async def _complete_battle(
                                     side=which,
                                     ems_current=current,
                                     ems_start=start,
-                                    cap=nudge_cap,
+                                    cap=own_threshold_cap,
                                 )
                                 await thread.send(embed=nudge_embed)
                 except Exception:

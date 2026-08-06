@@ -14,6 +14,7 @@ COMMANDS
 /ems request          — deployed member, guided DM conversation
 /ems submit           — player, pastes fleet/army builder block after approval
 /ems balance          — any member, DMs own EMS pool balances
+/ems view @player     — any member, DMs requester that player's commander block
 /ems history [name]   — any member (own), admin (any), last 10 changes
 /ems refit            — player, requests post-campaign block refit via DM
 /ems adjust @player   — admin only, direct add/subtract
@@ -157,6 +158,87 @@ def _extract_units_section(block: str) -> str:
     return '\n'.join(result) if result else '(none)'
 
 # =============================================================================
+# EMS VIEW — embed builder + commander picker (used only by /ems view)
+# =============================================================================
+
+def _build_ems_view_embed(commander: dict, owner: discord.Member | None) -> discord.Embed:
+    """Build the private EMS block embed for a single commander."""
+    force  = commander.get('force_type', 'N/A')
+    status = "Deployed" if commander.get('active_campaign') else "Available"
+
+    embed = discord.Embed(
+        title=f"🗂️ {commander['commander_name']} [{commander.get('rank', 'N/A')}]",
+        color=discord.Color.blue(),
+    )
+    embed.add_field(name="Player", value=owner.mention if owner else "Unknown", inline=True)
+    embed.add_field(name="Force Type", value=force, inline=True)
+    embed.add_field(name="Status", value=status, inline=True)
+
+    if force == 'Fleet':
+        block = commander.get('fleet_ems_block')
+        pool  = commander.get('fleet_total_ems', 0) or 0
+        label = commander.get('fleet_name') or "Unnamed Fleet"
+        embed.add_field(name="Fleet Name", value=label, inline=True)
+        embed.add_field(name="Fleet EMS Pool", value=str(pool), inline=True)
+    elif force == 'Army':
+        block = commander.get('army_ems_block')
+        pool  = commander.get('army_total_ems', 0) or 0
+        label = commander.get('army_name') or "Unnamed Army"
+        embed.add_field(name="Army Name", value=label, inline=True)
+        embed.add_field(name="Army EMS Pool", value=str(pool), inline=True)
+    else:
+        block = None
+
+    units = _extract_units_section(block) if block else None
+    if units and units != '(none)':
+        if len(units) > 1000:
+            units = units[:1000].rsplit('\n', 1)[0] + "\n… (truncated)"
+        embed.add_field(name="Units", value=f"```\n{units}\n```", inline=False)
+    else:
+        embed.add_field(name="Units", value="No block submitted yet.", inline=False)
+
+    return embed
+
+
+class _CommanderSelect(discord.ui.Select):
+    """Dropdown letting the requester pick which of a player's commanders to view."""
+
+    def __init__(self, commanders: list[dict], owner: discord.Member):
+        self.commanders_by_id = {str(c['commander_id']): c for c in commanders}
+        self.owner = owner
+
+        options = [
+            discord.SelectOption(
+                label=c['commander_name'][:100],
+                description=f"{c.get('force_type', '?')} — {c.get('rank', 'N/A')}"[:100],
+                value=str(c['commander_id']),
+            )
+            for c in commanders[:25]
+        ]
+        super().__init__(placeholder="Choose a commander…", options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        commander = self.commanders_by_id[self.values[0]]
+        embed = _build_ems_view_embed(commander, self.owner)
+        await interaction.response.edit_message(content=None, embed=embed, view=None)
+
+
+class _CommanderSelectView(discord.ui.View):
+    def __init__(self, commanders: list[dict], owner: discord.Member):
+        super().__init__(timeout=300)
+        self.message = None
+        self.add_item(_CommanderSelect(commanders, owner))
+
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        if self.message:
+            try:
+                await self.message.edit(view=self)
+            except discord.HTTPException:
+                pass
+
+# =============================================================================
 # EMS COG
 # =============================================================================
 
@@ -269,6 +351,53 @@ class EmsCog(commands.Cog, name="EMS"):
             await interaction.followup.send("📬 EMS balances sent to your DMs.", ephemeral=True)
         except discord.Forbidden:
             await interaction.followup.send(embed=embed, ephemeral=True)
+
+    # -------------------------------------------------------------------------
+    # /ems view — any member, DMs the requester a player's commander EMS block
+    # -------------------------------------------------------------------------
+
+    @ems_group.command(
+        name="view",
+        description="Privately view a player's commander EMS block in your DMs.",
+    )
+    @app_commands.describe(player="The player whose commander(s) to look up.")
+    async def ems_view(self, interaction: discord.Interaction, player: discord.Member):
+        await interaction.response.defer(ephemeral=True)
+
+        if player.id != interaction.user.id and not self._is_admin(interaction.user):
+            await interaction.followup.send(
+                "❌ You can only view your own commanders.", ephemeral=True
+            )
+            return
+
+        commanders = commander_repo.get_commanders_for_user(
+            self.db, player.id, interaction.guild.id
+        )
+        if not commanders:
+            await interaction.followup.send(
+                f"❌ **{player.display_name}** has no commanders.", ephemeral=True
+            )
+            return
+
+        try:
+            if len(commanders) == 1:
+                await interaction.user.send(
+                    embed=_build_ems_view_embed(commanders[0], player)
+                )
+            else:
+                view = _CommanderSelectView(commanders, player)
+                view.message = await interaction.user.send(
+                    f"**{player.display_name}** has multiple commanders — pick one:",
+                    view=view,
+                )
+        except discord.Forbidden:
+            await interaction.followup.send(
+                "❌ I couldn't DM you — open your DMs for this server and try again.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.followup.send("📬 Check your DMs.", ephemeral=True)
 
     # -------------------------------------------------------------------------
     # /ems history

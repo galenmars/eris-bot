@@ -190,12 +190,17 @@ def build_progress_embed(
     Build the post-battle E.R.I.S. Strategic Update embed.
     Returns a discord.Embed ready to post in the campaign thread.
     """
-    situation     = _classify_situation(a_current, a_start, b_current, b_start, battle_number)
-    taunt         = random.choice(_TAUNTS.get(situation, _TAUNTS['general']))
+    situation = _classify_situation(a_current, a_start, b_current, b_start, battle_number)
+    taunt = random.choice(_TAUNTS.get(situation, _TAUNTS['general']))
     effective_cap = cap if cap > 0 else max(a_start, b_start, 1)
 
-    a_pct = round(a_current / effective_cap * 100)
-    b_pct = round(b_current / effective_cap * 100)
+    # Each side's percentage/bar is relative to what THAT side actually
+    # committed (a_start/b_start) — not the campaign-wide cap. The cap
+    # is only a fallback if a side's start is somehow 0.
+    a_effective_start = a_start if a_start > 0 else effective_cap
+    b_effective_start = b_start if b_start > 0 else effective_cap
+    a_pct = round(a_current / a_effective_start * 100)
+    b_pct = round(b_current / b_effective_start * 100)
 
     # Battle result line
     if battle_winner:
@@ -215,10 +220,10 @@ def build_progress_embed(
         + (f"\n" + "\n".join(ems_delta) + "\n" if ems_delta else "\n")
         + f"\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         f"**🔵 Side A — {side_a_label}**\n"
-        f"`{_ems_bar(a_current, effective_cap)}` {a_pct}%\n"
+        f"`{_ems_bar(a_current, a_effective_start)}` {a_pct}%\n"
         f"`{a_current}` / `{a_start}` EMS remaining\n\n"
         f"**🔴 Side B — {side_b_label}**\n"
-        f"`{_ems_bar(b_current, effective_cap)}` {b_pct}%\n"
+        f"`{_ems_bar(b_current, b_effective_start)}` {b_pct}%\n"
         f"`{b_current}` / `{b_start}` EMS remaining\n"
         f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"*{taunt}*"
@@ -261,11 +266,13 @@ def build_critical_nudge_embed(
         "Statistically speaking, this is the part where things get decided.",
     ]
 
-    effective_cap = cap if cap > 0 else max(ems_start, 1)
-    pct      = round(ems_current / effective_cap * 100)
-    emoji    = '🔵' if side == 'a' else '🔴'
-    color    = discord.Color.blue() if side == 'a' else discord.Color.red()
-    bar      = _ems_bar(ems_current, effective_cap)
+    # Percentage is relative to this side's OWN starting pool, not the
+    # combined campaign cap — matches build_progress_embed's fix.
+    effective_start = ems_start if ems_start > 0 else (cap if cap > 0 else 1)
+    pct = round(ems_current / effective_start * 100)
+    emoji = '🔵' if side == 'a' else '🔴'
+    color = discord.Color.blue() if side == 'a' else discord.Color.red()
+    bar = _ems_bar(ems_current, effective_start)
 
     description = (
         f"{emoji} **{side_label}** has fallen below **20% EMS**.\n\n"
