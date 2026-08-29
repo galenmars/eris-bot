@@ -1321,9 +1321,6 @@ function changeQty(id, delta) {
   const current = state.army[id] || 0;
   let next = Math.max(0, current + delta);
 
-  // Force users are individuals — cap qty at 1
-  if (unit && unit.force_user && next > 1) next = 1;
-
   if (next === 0) {
     delete state.army[id];
     delete state.unitNames[id];
@@ -1460,7 +1457,6 @@ function computeSpent() {
 // ── VALIDATION (mirror validate_army force-user rules) ──────────────────────
 function validateArmy() {
   const errors = [];
-  let darthCount = 0;
   const allowed = FORCE_TIER_ACCESS[state.tier] || [];
 
   UNITS.forEach(u => {
@@ -1469,8 +1465,6 @@ function validateArmy() {
     if (u.tier > state.tier) errors.push(`${u.name} requires Tier ${u.tier}`);
     if (u.force_user) {
       if (!allowed.includes(u.id)) errors.push(`${u.name} not available at Tier ${state.tier}`);
-      if (u.id === 'darth') { darthCount += qty; if (darthCount > 1) errors.push('Maximum one Darth per army'); }
-      if (qty > 1) errors.push(`${u.name} is a Force user — only one may be fielded`);
     }
   });
   return errors;

@@ -160,51 +160,38 @@ def roll_dice(dice_str: str) -> dict:
 # TACTIC BONUS
 # =============================================================================
 
-def get_tactic_bonus(tactic_id: str, theme: dict) -> int:
+def get_tactic_bonus(tactic_id: str, opponent_tactic_id: str, theme: dict) -> int:
     """
-    Look up the bonus for a tactic choice from the theme JSON.
+    Look up the bonus for a tactic choice AGAINST a specific opponent tactic.
 
-    WHY READ FROM THEME INSTEAD OF HARDCODING?
-    -------------------------------------------
-    The original bot hardcoded tactic bonuses. This means if a guild
-    wants different risk/reward scaling, they would need to edit Python.
-    By reading from the theme JSON, a guild can define their own tactic
-    bonuses without touching code:
+    Tactics form a rock-paper-scissors matrix, not a flat bonus list:
+        Defensive beats Aggressive (+2 / -2)
+        Aggressive beats Risky (+2 / -2)
+        Risky beats Defensive (+2 / -2)
+        Cautious is weak into everything except mirrors (-1) but +1 elsewhere
+        Same tactic vs itself = No Bonus (0)
 
-        {"id": "cautious",   "bonus": 0}
-        {"id": "defensive",  "bonus": 1}
-        {"id": "aggressive", "bonus": 2}
-        {"id": "risky",      "bonus": 3}
-
-    The function just looks up whatever the theme says.
-
-    WHAT IF THE TACTIC IS NOT FOUND?
-    ---------------------------------
-    Returns 0 as a safe fallback. A broken tactic gives no bonus rather
-    than crashing the battle. The warning in the log makes it debuggable.
+    Reads from theme['tactic_matchups'], structured identically to
+    space_matchups / ground_matchups:
+        {"attacker": "defensive", "defender": "aggressive", "attacker_mod": 2}
 
     Args:
-        tactic_id (str): The tactic identifier string, e.g. "aggressive".
-                         Must match the 'id' field in the theme's tactics list.
-        theme     (dict): The loaded theme dictionary from the JSON file.
+        tactic_id          (str): This player's tactic, e.g. "defensive"
+        opponent_tactic_id (str): The opponent's tactic, e.g. "aggressive"
+        theme               (dict): The loaded theme dictionary.
 
     Returns:
-        int: The bonus value for this tactic. Returns 0 if not found.
-
-    Examples:
-        get_tactic_bonus("aggressive", theme) → 2
-        get_tactic_bonus("risky",      theme) → 3
-        get_tactic_bonus("unknown",    theme) → 0  (with warning)
+        int: This player's bonus for this tactic matchup. 0 if not found
+             (correctly covers mirror matchups where tactic == opponent_tactic).
     """
-    tactics = theme.get('tactics', [])
+    matchups = theme.get('tactic_matchups', [])
 
-    for tactic in tactics:
-        if tactic.get('id') == tactic_id:
-            return tactic.get('bonus', 0)
+    for matchup in matchups:
+        if (matchup.get('attacker') == tactic_id and
+                matchup.get('defender') == opponent_tactic_id):
+            return matchup.get('attacker_mod', 0)
 
-    # Tactic not found in theme
-    print(f"[dice.py] WARNING: Tactic '{tactic_id}' not found in theme '{theme.get('theme_name', 'unknown')}'")
-    print(f"[dice.py] Available tactics: {[t.get('id') for t in tactics]}")
+    # Not found — either a mirror matchup (correctly 0) or missing entry
     return 0
 
 
@@ -296,10 +283,11 @@ def get_ground_matchup_bonus(attacker_type: str, defender_type: str, theme: dict
 # =============================================================================
 
 def calculate_round_total(
-    dice_str:      str,
-    tactic_id:     str,
-    matchup_bonus: int,
-    theme:         dict,
+    dice_str:           str,
+    tactic_id:          str,
+    opponent_tactic_id: str,
+    matchup_bonus:       int,
+    theme:               dict,
 ) -> dict:
     """
     Calculate a player's complete total for one round of battle.
@@ -349,8 +337,8 @@ def calculate_round_total(
     # Roll the dice
     dice_result   = roll_dice(dice_str)
 
-    # Get the tactic bonus from the theme
-    tactic_bonus  = get_tactic_bonus(tactic_id, theme)
+    # Get the tactic bonus from the theme — needs both tactics for the matrix lookup
+    tactic_bonus  = get_tactic_bonus(tactic_id, opponent_tactic_id, theme)
 
     # Combine everything into the final round total
     total = dice_result['total'] + tactic_bonus + matchup_bonus

@@ -406,8 +406,10 @@ def calculate_space_round(
     p2_matchup = get_space_matchup_bonus(p2_fleet_type, p1_fleet_type, theme)
 
     # Step 2: Calculate each player's round total
-    p1_result = calculate_round_total(dice_str, p1_tactic, p1_matchup, theme)
-    p2_result = calculate_round_total(dice_str, p2_tactic, p2_matchup, theme)
+    # Each player's tactic bonus depends on BOTH tactics — the matrix lookup
+    # needs to know what the opponent picked, not just your own choice.
+    p1_result = calculate_round_total(dice_str, p1_tactic, p2_tactic, p1_matchup, theme)
+    p2_result = calculate_round_total(dice_str, p2_tactic, p1_tactic, p2_matchup, theme)
 
     p1_total = p1_result['total']
     p2_total = p2_result['total']

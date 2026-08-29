@@ -64,26 +64,84 @@
     {
       "id": "cautious",
       "name": "Cautious",
-      "bonus": 0,
       "description": "No risk, no reward. Play it safe."
     },
     {
       "id": "defensive",
       "name": "Defensive",
-      "bonus": 1,
       "description": "Hold the line. Modest advantage."
     },
     {
       "id": "aggressive",
       "name": "Aggressive",
-      "bonus": 2,
       "description": "Push hard. Meaningful advantage with manageable risk."
     },
     {
       "id": "risky",
       "name": "Risky",
-      "bonus": 3,
       "description": "All or nothing. Maximum bonus but dangerous in an even fight."
+    }
+  ],
+  "tactic_matchups": [
+    {
+      "attacker": "cautious",
+      "defender": "aggressive",
+      "attacker_mod": -1
+    },
+    {
+      "attacker": "cautious",
+      "defender": "defensive",
+      "attacker_mod": -1
+    },
+    {
+      "attacker": "cautious",
+      "defender": "risky",
+      "attacker_mod": -1
+    },
+    {
+      "attacker": "aggressive",
+      "defender": "cautious",
+      "attacker_mod": 1
+    },
+    {
+      "attacker": "aggressive",
+      "defender": "defensive",
+      "attacker_mod": -2
+    },
+    {
+      "attacker": "aggressive",
+      "defender": "risky",
+      "attacker_mod": 2
+    },
+    {
+      "attacker": "defensive",
+      "defender": "cautious",
+      "attacker_mod": 1
+    },
+    {
+      "attacker": "defensive",
+      "defender": "aggressive",
+      "attacker_mod": 2
+    },
+    {
+      "attacker": "defensive",
+      "defender": "risky",
+      "attacker_mod": -2
+    },
+    {
+      "attacker": "risky",
+      "defender": "cautious",
+      "attacker_mod": 1
+    },
+    {
+      "attacker": "risky",
+      "defender": "aggressive",
+      "attacker_mod": -2
+    },
+    {
+      "attacker": "risky",
+      "defender": "defensive",
+      "attacker_mod": 2
     }
   ],
   "space_force_types": {
@@ -1139,7 +1197,12 @@
     {
       "id": "resistance",
       "name": "Resistance movements",
-      "aliases": ["balmorra", "corellian resistance", "balmorran resistance", "taris underground"],
+      "aliases": [
+        "balmorra",
+        "corellian resistance",
+        "balmorran resistance",
+        "taris underground"
+      ],
       "group": "planetary",
       "preferred_space_type": null,
       "preferred_ground_type": "combined_arms"
