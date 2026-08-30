@@ -762,7 +762,7 @@ async def _resolve_exchange(
 
     att_roll   = dice.roll_dice(DICE_COMBAT)
     att_raw    = att_roll['rolls'][0]
-    att_result = dice.calculate_round_total(DICE_COMBAT, att_tactic, att_matchup, theme)
+    att_result = dice.calculate_round_total(DICE_COMBAT, att_tactic, def_tactic, att_matchup, theme)
     att_total  = att_result['total'] + att_penalty
 
     await channel.send(f"🎲 {att_cmd['commander_name']} — **{att_total}**")
@@ -782,7 +782,7 @@ async def _resolve_exchange(
 
     def_roll   = dice.roll_dice(DICE_COMBAT)
     def_raw    = def_roll['rolls'][0]
-    def_result = dice.calculate_round_total(DICE_COMBAT, def_tactic, def_matchup, theme)
+    def_result = dice.calculate_round_total(DICE_COMBAT, def_tactic, att_tactic, def_matchup, theme)
     def_total  = def_result['total'] + def_penalty
 
     await channel.send(f"🎲 {def_cmd['commander_name']} — **{def_total}**")
